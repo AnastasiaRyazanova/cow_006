@@ -3,8 +3,6 @@ from typing import Self
 
 
 class Card:
-    #RANK = [1, 2, 3, 5, 7]
-    #COLORS = ['g', 'b', 'y', 'r', 'p']
     NUMBERS = list(range(1, 105))
 
     def __init__(self, number: int):
@@ -49,4 +47,35 @@ class Card:
         """Можно ли играть карту self на карту last."""
         return self.number > last_card.number
 
+    @staticmethod
+    def all_cards() -> list['Card']:
+        """Создаёт и возвращает все карты от 1 до 104."""
+        return [Card(number=num) for num in Card.NUMBERS]
 
+
+def create_deck() -> list:
+    """Создаёт и возвращает колоду из всех карт."""
+    return Card.all_cards()
+
+
+def show_cards():
+    deck = create_deck()
+
+    # Вывод карт в строчку
+    print('Карты в строчку:', deck)
+
+    # Вывод карт в столбики
+    def display_cards(cards, columns=10):
+        for i in range(0, len(cards), columns):
+            print(' '.join(repr(card) for card in cards[i:i + columns]))
+
+    print('Карты в столбик')
+    display_cards(deck, columns=13)
+
+
+def main():
+    input('Нажмите Enter, чтобы посмотреть список карт') or show_cards()
+
+
+if __name__ == "__main__":
+    main()
