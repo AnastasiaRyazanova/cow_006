@@ -37,24 +37,16 @@ class Card:
 
     @staticmethod
     def load(text: str):
-        """From 'y3' to Card('y', 3)."""
-        return Card(number=int(text[0]))
+        number_str = text.split('<')[0].strip('[]')
+        return Card(number=int(number_str))
+
+    def __eq__(self, other):
+        if isinstance(other, Card):
+            return self.number == other.number
+        return False
 
     def can_play(self, last_card: Self) -> bool:
         """Можно ли играть карту self на карту last."""
         return self.number > last_card.number
 
-    # @staticmethod
-    # def all_cards(colors: list[str] | None = None, numbers: None | list[int] = None):
-    #     if numbers is None:
-    #         numbers = Card.NUMBERS
-    #     # cards = []
-    #     # for col in colors:
-    #     #     for num in numbers:
-    #     #         cards.append(Card(color=col, number=num))
-    #     cards = [Card(number=num) for num in numbers]
-    #     return cards
 
-        #def score(self):
-            #"""Штрафные очки за карту."""
-            #return self.rank

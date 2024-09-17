@@ -33,3 +33,14 @@ def test_can_play():
     assert not c4.can_play(c3)
     assert not c5.can_play(c3)
 
+
+def test_load():
+    s = '[17<1>]'
+    c = Card.load(s)
+    assert c == Card(17)
+
+    s = '[55<7>]'
+    c = Card.load(s)
+    assert c == Card(55)
+
+
