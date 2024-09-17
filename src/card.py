@@ -7,9 +7,7 @@ class Card:
 
     def __init__(self, number: int):
         if number not in Card.NUMBERS:
-            raise ValueError
-        #if rank not in Card.RANK:
-            #raise ValueError
+            raise ValueError("Неверный номер карты.")
 
         self.number = number
         self.rank = self.cow_rank()
@@ -28,7 +26,6 @@ class Card:
 
     def __repr__(self):
         return f'[{self.number}<{self.rank}>]'
-            #return f'[{self.color}{self.number}<{self.rank}>]'
 
     def save(self):
         return repr(self)
@@ -79,3 +76,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
