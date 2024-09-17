@@ -25,11 +25,11 @@ def test_can_play():
     c4 = Card(6)
     c5 = Card(55)
 
-    assert c1.can_play(c2) is True
-    assert c2.can_play(c1) is False
-    assert c3.can_play(c2) is True
-    assert c2.can_play(c3) is False
-    assert c3.can_play(c4) is True
-    assert c4.can_play(c3) is False
-    assert c5.can_play(c3) is False
+    assert c1.can_play(c2)
+    assert not c2.can_play(c1)
+    assert c3.can_play(c2)
+    assert not c2.can_play(c3)
+    assert c3.can_play(c4)
+    assert not c4.can_play(c3)
+    assert not c5.can_play(c3)
 
