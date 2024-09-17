@@ -1,6 +1,6 @@
 import pytest
 
-from src.cards import Card
+from src.card_fake import Card
 
 
 def test_init():
