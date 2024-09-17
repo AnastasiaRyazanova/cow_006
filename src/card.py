@@ -44,16 +44,16 @@ class Card:
         """Можно ли играть карту self на карту last."""
         return self.number > last_card.number
 
-    @staticmethod
-    def all_cards(colors: list[str] | None = None, numbers: None | list[int] = None):
-        if numbers is None:
-            numbers = Card.NUMBERS
-        # cards = []
-        # for col in colors:
-        #     for num in numbers:
-        #         cards.append(Card(color=col, number=num))
-        cards = [Card(number=num) for num in numbers]
-        return cards
+    # @staticmethod
+    # def all_cards(colors: list[str] | None = None, numbers: None | list[int] = None):
+    #     if numbers is None:
+    #         numbers = Card.NUMBERS
+    #     # cards = []
+    #     # for col in colors:
+    #     #     for num in numbers:
+    #     #         cards.append(Card(color=col, number=num))
+    #     cards = [Card(number=num) for num in numbers]
+    #     return cards
 
         #def score(self):
             #"""Штрафные очки за карту."""
