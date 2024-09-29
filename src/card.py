@@ -44,6 +44,9 @@ class Card:
         """Можно ли играть карту self на карту last."""
         return self.number > last_card.number
 
+    def __hash__(self):
+        return hash(self.number)
+
     @staticmethod
     def all_cards() -> list['Card']:
         """Создаёт и возвращает все карты от 1 до 104."""
@@ -53,6 +56,9 @@ class Card:
 def create_deck() -> list:
     """Создаёт и возвращает колоду из всех карт."""
     return Card.all_cards()
+
+
+
 
 
 def show_cards():
