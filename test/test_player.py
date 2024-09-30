@@ -1,6 +1,7 @@
 from src.hand import Hand
 from src.card import Card
 from src.player import Player
+from src.row import Row
 
 
 def test_init():
@@ -47,3 +48,20 @@ def test_is_loser():
     p = Player(name='Ast', hand=h, score=69)
     assert p.is_loser()
 
+
+def test_update_score():
+    initial_score = 10
+    h = Hand(cards=[Card(1), Card(2)])
+    player = Player(name='Ast', hand=h, score=initial_score)
+
+    row = Row()
+    row.add_card(Card(5))
+    row.add_card(Card(15))
+    row.add_card(Card(25))
+
+    expected_row_score = row.score()  # 2 + 2 + 2 = 6
+
+    player.update_score_from_row(row)
+
+    assert player.score == initial_score + expected_row_score
+    assert player.score == 16

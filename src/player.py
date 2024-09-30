@@ -1,7 +1,7 @@
 import json
 import typing
 from src.hand import Hand
-from src.card import Card
+from src.row import Row
 
 
 class Player:
@@ -33,8 +33,10 @@ class Player:
     def load(cls, data: dict):
         return cls(name=data['name'], hand=Hand.load(data['hand']), score=int(data['score']))
 
+    def update_score_from_row(self, row: Row):
+        """Обновляет счет игрока."""
+        self.score += row.score()
+
     def is_loser(self) -> bool:
         """Проверяет, проиграл ли игрок."""
         return self.score >= 66
-
-
