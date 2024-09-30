@@ -1,7 +1,3 @@
-'''
-класс deck + тесты
-'''
-
 import random
 from src.card import Card
 

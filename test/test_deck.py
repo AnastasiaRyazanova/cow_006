@@ -12,7 +12,7 @@ def test_init():
 
 
 def test_init_shuffle():
-    """Проверяем, что карт столько же, но они в другом порядке."""
+    """Проверяется, что карт столько же, но они в другом порядке."""
     full_deck1 = Deck(None)
     full_deck2 = Deck(None)
     assert len(full_deck1.cards) == len(full_deck2.cards)
