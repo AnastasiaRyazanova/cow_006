@@ -1,5 +1,3 @@
-import random
-
 from src.card import Card
 from src.hand import Hand
 
@@ -23,14 +21,6 @@ def test_load():
     d = Hand.load('[3<1>] [10<3>] [77<5>]')
     expected_deck = Hand(cards)
     assert d == expected_deck
-
-
-def test_score():
-    h = Hand.load('[3<1>] [10<3>] [77<5>]')
-    assert h.score() == 9
-
-    h = Hand.load('[45<2>] [71<1>]')
-    assert h.score() == 3
 
 
 def test_add_card():

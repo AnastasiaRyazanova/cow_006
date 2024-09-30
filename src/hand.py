@@ -30,24 +30,3 @@ class Hand:
     def remove_card(self, card: Card):
         self.cards.remove(card)
 
-    def score(self) -> int:
-        return sum(c.cow_rank() for c in self.cards)
-
-
-def main():
-    card1 = Card(45)
-    card2 = Card(2)
-    card3 = Card(55)
-
-    # Создаем руку игрока и добавляем карты в руку
-    hand = Hand()
-    hand.add_card(card1)
-    hand.add_card(card2)
-    hand.add_card(card3)
-
-    # Выводим руку игрока
-    print("Карты в руке игрока:", hand)
-
-
-if __name__ == "__main__":
-    main()
