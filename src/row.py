@@ -1,4 +1,3 @@
-from typing import List
 from src.card import Card
 
 
@@ -6,13 +5,9 @@ class Row:
     MAX_CARDS = 6
 
     def __init__(self):
-        self.cards: List[Card] = []
+        self.cards: list[Card] = []
 
     def add_card(self, card: Card) -> bool:
-        """Добавляет карту в ряд, если это возможно."""
-        if len(self.cards) >= Row.MAX_CARDS:
-            return False
-
         if not self.cards:
             self.cards.append(card)
             return True
@@ -26,11 +21,11 @@ class Row:
 
     def is_full(self) -> bool:
         """Проверяет, достигнут ли максимум карт в ряду."""
-        return len(self.cards) >= Row.MAX_CARDS
+        return len(self.cards) == Row.MAX_CARDS
 
-    def total_rank(self) -> int:
+    def score(self) -> int:
         """Возвращает сумму рангов карт в ряду."""
-        return sum(card.rank for card in self.cards)
+        return sum(c.cow_rank() for c in self.cards)
 
     def clear(self):
         """Очищает ряд."""
