@@ -1,14 +1,17 @@
+'''
+класс deck + тесты
+'''
+
 import random
-from typing import List, Optional
 from src.card import Card
 
 
 class Deck:
-    def __init__(self, cards: List[Card] = None):
+    def __init__(self, cards: None | list[Card]):
         if cards is None:
             cards = Card.all_cards()
             random.shuffle(cards)
-        self.cards: List[Card] = cards
+        self.cards: list[Card] = cards
 
     def __repr__(self) -> str:
         return self.save()
@@ -33,11 +36,11 @@ class Deck:
                     print(f"Error loading card from {s}: {e}")
         return cls(cards=cards)
 
-    def draw_card(self) -> Optional[Card]:
+    def draw_card(self):
         """Берет карту из колоды и возвращает ее."""
         return self.cards.pop() if self.cards else None
 
-    def full_deck(self) -> List[Card]:
+    def full_deck(self):
         """Возвращает всю колоду."""
         return self.cards
 
