@@ -65,9 +65,6 @@ def create_deck() -> list:
     return Card.all_cards()
 
 
-
-
-
 def show_cards():
     deck = create_deck()
 
@@ -89,7 +86,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
 
