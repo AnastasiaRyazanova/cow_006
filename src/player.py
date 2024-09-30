@@ -25,7 +25,7 @@ class Player:
     def save(self) -> dict:
         return {
             'name': self.name,
-            'hand': self.hand.save(),  # Используем метод save() у руки для сохранения
+            'hand': self.hand.save(),
             'score': self.score
         }
 

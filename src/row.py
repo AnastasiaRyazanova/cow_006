@@ -37,4 +37,4 @@ class Row:
         self.cards.clear()
 
     def __repr__(self):
-        return f"Row({self.cards})"
+        return ' '.join(repr(card) for card in self.cards)
