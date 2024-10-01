@@ -42,7 +42,7 @@ class Table:
                 if 0 <= chosen_row_index < len(self.rows):
                     return self.rows[chosen_row_index]
                 else:
-                    print("Неправильный номер ряда. Попробуйте снова.")
+                    print("Неверный номер ряда. Попробуйте снова.")
             except ValueError:
                 print("Пожалуйста, введите число.")
 
@@ -53,12 +53,11 @@ class Table:
         return json.dumps([[card.to_dict() for card in row.cards] for row in self.rows])
 
     @classmethod
-    def load(cls, json_data: str):
-        data = json.loads(json_data)
+    def load(cls, rows_data: list[str]):
         table = cls()
-        for i, row_data in enumerate(data):
-            for card_data in row_data:
-                card = Card.from_dict(card_data)
+        for i, row_data in enumerate(rows_data):
+            cards = Card.load_multiple(row_data)
+            for card in cards:
                 table.rows[i].add_card(card)
         return table
 
