@@ -27,14 +27,24 @@ class Table:
         if best_row_index is not None:
             row = self.rows[best_row_index]
             if len(row.cards) == 5:
-                points = row.total_rank()
+                points = row.score()
                 row.clear()
                 row.add_card(card)
                 print(f"\n Игрок забрал ряд {best_row_index + 1}. Получено очков: {points}")
             else:
                 return row.add_card(card)
         return False  # Если нет доступного ряда, игрок выберет ряд, который заберет.
-                        # Прописывать в table?
+
+    def choose_row(self):
+        while True:
+            try:
+                chosen_row_index = int(input("Выберите ряд для забирания (1-4): ")) - 1
+                if 0 <= chosen_row_index < len(self.rows):
+                    return self.rows[chosen_row_index]
+                else:
+                    print("Неправильный номер ряда. Попробуйте снова.")
+            except ValueError:
+                print("Пожалуйста, введите число.")
 
     def get_row(self, index: int) -> Row:
         return self.rows[index]
