@@ -29,7 +29,7 @@ class Deck:
                 try:
                     cards.append(Card.load(s[1:-1]))
                 except Exception as e:
-                    print(f"Error loading card from {s}: {e}")
+                    print(f"Ошибка загрузки карты {s}: {e}")
         return cls(cards=cards)
 
     def draw_card(self):
