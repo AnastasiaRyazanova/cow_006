@@ -11,17 +11,13 @@ class Row:
         if not self.cards:
             self.cards.append(card)
             return True
-
-        last_card = self.cards[-1]
-        if card.can_play(last_card):
-            self.cards.append(card)
-            return True
+        else:
+            last_card = self.cards[-1]
+            if card.can_play(last_card):
+                self.cards.append(card)
+                return True
 
         return False
-
-    def is_full(self) -> bool:
-        """Проверяет, достигнут ли максимум карт в ряду."""
-        return len(self.cards) == Row.MAX_CARDS
 
     def score(self) -> int:
         """Возвращает сумму рангов карт в ряду."""
