@@ -24,18 +24,12 @@ class Card:
         else:
             return 1
 
-    def to_dict(self):
-        return {'number': self.number, 'rank': self.rank}
-
     def __repr__(self):
         return f'[{self.number}<{self.rank}>]'
 
     def save(self):
         return repr(self)
 
-    @classmethod
-    def from_dict(cls, data):
-        return cls(data['number'])
 
     @staticmethod
     def load(text: str):
