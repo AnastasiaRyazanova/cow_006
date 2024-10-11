@@ -30,7 +30,6 @@ class Card:
     def save(self):
         return repr(self)
 
-
     @staticmethod
     def load(text: str):
         number_str = text.split('<')[0].strip('[]')
