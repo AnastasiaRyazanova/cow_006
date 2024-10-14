@@ -35,15 +35,6 @@ class Card:
         number_str = text.split('<')[0].strip('[]')
         return Card(number=int(number_str))
 
-    @staticmethod
-    def load_multiple(text: str) -> list['Card']:
-        """Загружает несколько карт из строки."""
-        cards = []
-        for s in text.strip('[]').split('] ['):
-            if s:  # Проверяем на пустую строку
-                cards.append(Card.load(f'[{s}]'))
-        return cards
-
     def __eq__(self, other):
         if isinstance(other, Card):
             return self.number == other.number
