@@ -5,6 +5,8 @@ from src.row import Row
 
 
 class Player:
+    score_limit = 66
+
     def __init__(self, name: str, hand: Hand, score: int = 0):
         self.name = name
         self.hand = hand
@@ -39,4 +41,5 @@ class Player:
 
     def is_loser(self) -> bool:
         """Проверяет, проиграл ли игрок."""
-        return self.score >= 66
+        return self.score >= self.score_limit
+    
