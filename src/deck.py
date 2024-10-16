@@ -18,28 +18,29 @@ class Deck:
         return self.cards == other.cards
 
     def save(self) -> str:
-        """Сохраняет колоду в простом текстовом формате."""
         return ' '.join(card.save() for card in self.cards)
 
     @classmethod
     def load(cls, text: str) -> 'Deck':
+        """Загружает колоду из строки"""
         cards = []
         for s in text.split():
             if s.startswith('[') and s.endswith(']'):
-                try:
-                    cards.append(Card.load(s[1:-1]))
-                except Exception as e:
-                    print(f"Ошибка загрузки карты {s}: {e}")
+                cards.append(Card.load(s[1:-1]))
         return cls(cards=cards)
 
     def draw_card(self):
-        """Берет карту из колоды и возвращает ее."""
+        """Берет карту из колоды и возвращает ее, убирая из колоды"""
         return self.cards.pop() if self.cards else None
 
     def full_deck(self):
-        """Возвращает всю колоду."""
+        """Возвращает всю колоду"""
         return self.cards
 
     def shuffle(self):
-        """Перемешивает колоду."""
+        """Перемешивает колоду"""
         random.shuffle(self.cards)
+
+
+# full_deck = Deck(Card.all_cards())
+# print(full_deck)
