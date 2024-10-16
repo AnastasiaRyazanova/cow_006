@@ -13,6 +13,7 @@ class Card:
         self.rank = self.cow_rank()
 
     def cow_rank(self) -> int:
+        """Вычисляет очки карты по номеру"""
         if self.number == 55:
             return 7
         elif self.number % 11 == 0 and self.number != 55:
@@ -32,6 +33,7 @@ class Card:
 
     @staticmethod
     def load(text: str):
+        """Загружает карту из строки"""
         number_str = text.split('<')[0].strip('[]')
         return Card(number=int(number_str))
 
@@ -41,7 +43,7 @@ class Card:
         return False
 
     def can_play(self, last_card: Self) -> bool:
-        """Можно ли играть карту self на карту last."""
+        """Можно ли играть карту self на карту last"""
         return self.number > last_card.number
 
     def __hash__(self):
@@ -49,16 +51,17 @@ class Card:
 
     @staticmethod
     def all_cards() -> list['Card']:
-        """Создаёт и возвращает все карты от 1 до 104."""
+        """Создаёт и возвращает все карты от 1 до 104"""
         return [Card(number=num) for num in Card.NUMBERS]
 
 
 def create_deck() -> list:
-    """Создаёт и возвращает колоду из всех карт."""
+    """Создаёт и возвращает колоду из всех карт"""
     return Card.all_cards()
 
 
 def show_cards():
+    """Вывод всех карт"""
     deck = create_deck()
 
     # Вывод карт в строчку

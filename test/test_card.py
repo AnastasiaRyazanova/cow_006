@@ -6,6 +6,22 @@ def test_init():
     assert c.number == 22
 
 
+def test_invalid_card():
+    """Проверяет на правильный ввод карты"""
+    valid_numbers = [1, 10, 55, 100, 104]
+    for number in valid_numbers:
+        c = Card(number)
+        assert c.number == number
+
+    invalid_numbers = [0, 105, -1, 50.5, 'abc']
+    for number in invalid_numbers:
+        try:
+            Card(number)
+            assert False
+        except ValueError:
+            pass
+
+
 def test_save():
     c = Card(22)
     assert repr(c) == '[22<5>]'
