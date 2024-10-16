@@ -21,6 +21,7 @@ class Hand:
 
     @classmethod
     def load(cls, text: str) -> typing.Self:
+        """Загружает руку из строки"""
         cards = [Card.load(s[1:-1]) for s in text.split() if s.startswith('[') and s.endswith(']')]
         return cls(cards=cards)
 

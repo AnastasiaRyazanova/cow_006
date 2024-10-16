@@ -9,7 +9,7 @@ def test_init():
     assert d.cards == cards
 
 
-def test_save():
+def test_save(): #сохранение руки
     d = Hand(cards=cards)
     assert d.save() == '[3<1>] [10<3>] [77<5>]'
 
@@ -17,13 +17,13 @@ def test_save():
     assert d.save() == ''
 
 
-def test_load():
+def test_load(): #загрузка руки
     d = Hand.load('[3<1>] [10<3>] [77<5>]')
     expected_deck = Hand(cards)
     assert d == expected_deck
 
 
-def test_add_card():
+def test_add_card(): #добавление карты
     h = Hand.load('[3<1>] [10<3>] [77<5>]')
     h.add_card(Card.load('[60<3>]'))
     assert repr(h) == '[3<1>] [10<3>] [77<5>] [60<3>]'
@@ -35,7 +35,7 @@ def test_add_card():
     assert repr(h) == '[3<1>] [10<3>] [77<5>] [60<3>] [8<1>] [34<1>]'
 
 
-def test_remove_card():
+def test_remove_card(): #удаление карты
     h = Hand.load('[3<1>] [10<3>] [77<5>] [60<3>] [8<1>]')
     c = Card.load('[77<5>]')
     h.remove_card(c)
