@@ -5,7 +5,7 @@ from src.row import Row
 
 
 class Player:
-    score_limit = 66
+    score_limit = 66 #максимальное число очков
 
     def __init__(self, name: str, hand: Hand, score: int = 0):
         self.name = name

@@ -65,3 +65,4 @@ def test_update_score():
 
     assert player.score == initial_score + expected_row_score
     assert player.score == 16
+
