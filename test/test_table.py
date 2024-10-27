@@ -2,6 +2,8 @@ import json
 from src.card import Card
 from src.row import Row
 from src.table import Table
+from src.player import Player
+from src.hand import Hand
 
 
 def test_table_init():
@@ -11,26 +13,53 @@ def test_table_init():
         assert isinstance(row, Row)
 
 
+def test_add_selected_cards():
+    table = Table()
+    hand1 = Hand()
+    hand2 = Hand()
+    player1 = Player("Player1", hand1)
+    player2 = Player("Player2", hand2)
+    card1 = Card(10)  # 1
+    card2 = Card(20)  # 3
+    card3 = Card(15)  # 2
+
+    table.add_selected_cards(player1, card1)
+    table.add_selected_cards(player2, card2)
+    table.add_selected_cards(player1, card3)
+
+    # проверяем, что карты отсортированы по возрастанию
+    assert table.selected_cards == [(player1, card1), (player1, card3), (player2, card2)]
+
+
 def test_add_card():
     table = Table()
+    hand1 = Hand()
+    player1 = Player("P1", hand1)
+    # Добавление выбранных карт
+    card1 = table.add_selected_cards(player1, Card(55))
+    card2 = table.add_selected_cards(player1, Card(76))
+    card3 = table.add_selected_cards(player1, Card(77))
+    card4 = table.add_selected_cards(player1, Card(83))
+    card5 = table.add_selected_cards(player1, Card(90))
+    card6 = table.add_selected_cards(player1, Card(91))
 
-    # Добавление карт
+    # Добавление карт в ряды
     table.add_card(Card(10))  # добавляется в 1 ряд
     table.add_card(Card(25))  # во 2 ряд
     table.add_card(Card(41))  # в 3 ряд
     table.add_card(Card(73))  # в 4 ряд
-    table.add_card(Card(55))  # в 3 ряд
-    table.add_card(Card(76))  # в 4 ряд (после 73)
-    table.add_card(Card(77))  # в 4 ряд (после 76)
-    table.add_card(Card(83))  # в 4 ряд (после 77)
-    table.add_card(Card(90))  # в 4 ряд (после 83)
+    table.add_card(card1)  # в 3 ряд
+    table.add_card(card2)  # в 4 ряд (после 73)
+    table.add_card(card3)  # в 4 ряд (после 76)
+    table.add_card(card4)  # в 4 ряд (после 77)
+    table.add_card(card5)  # в 4 ряд (после 83)
 
     assert repr(table[0]) == '[10<3>]'
     assert repr(table[1]) == '[25<2>]'
     assert repr(table[2]) == '[41<1>] [55<7>]'
     assert repr(table[3]) == '[73<1>] [76<1>] [77<5>] [83<1>] [90<3>]'
 
-    table.add_card(Card(91))  # 4 ряд очистится. игрок его забрал
+    table.add_card(card6)  # 4 ряд очистится. игрок его забрал
     assert repr(table[3]) == '[91<1>]'
     assert len(table[3].cards) == 1
 
@@ -38,15 +67,25 @@ def test_add_card():
 def test_save():
     """Тестируем сохранение состояния стола."""
     table = Table()
+    hand1 = Hand()
+    player1 = Player("P1", hand1)
+    card1 = table.add_selected_cards(player1, Card(55))
+    card2 = table.add_selected_cards(player1, Card(76))
+    card3 = table.add_selected_cards(player1, Card(77))
+    card4 = table.add_selected_cards(player1, Card(83))
+    card5 = table.add_selected_cards(player1, Card(90))
+    card6 = table.add_selected_cards(player1, Card(91))
+
+    # Добавление карт
     table.add_card(Card(10))  # добавляется в 1 ряд
     table.add_card(Card(25))  # во 2 ряд
     table.add_card(Card(41))  # в 3 ряд
     table.add_card(Card(73))  # в 4 ряд
-    table.add_card(Card(55))  # в 3 ряд
-    table.add_card(Card(76))  # в 4 ряд (после 73)
-    table.add_card(Card(77))  # в 4 ряд (после 76)
-    table.add_card(Card(83))  # в 4 ряд (после 77)
-    table.add_card(Card(90))  # в 4 ряд (после 83)
+    table.add_card(card1)  # в 3 ряд
+    table.add_card(card2)  # в 4 ряд (после 73)
+    table.add_card(card3)  # в 4 ряд (после 76)
+    table.add_card(card4)  # в 4 ряд (после 77)
+    table.add_card(card5)  # в 4 ряд (после 83)
 
     saved_data = table.save()
     expected_data = json.dumps({
