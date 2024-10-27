@@ -2,10 +2,11 @@ import json
 import typing
 from src.hand import Hand
 from src.row import Row
+from src.card import Card
 
 
 class Player:
-    score_limit = 66 #максимальное число очков
+    score_limit = 66  # максимальное число очков
 
     def __init__(self, name: str, hand: Hand, score: int = 0):
         self.name = name
@@ -42,4 +43,7 @@ class Player:
     def is_loser(self) -> bool:
         """Проверяет, проиграл ли игрок."""
         return self.score >= self.score_limit
-    
+
+    def add_card_to_hand(self, card: Card) -> None:
+        """Добавляет карту в руку игрока."""
+        self.hand.add_card(card)

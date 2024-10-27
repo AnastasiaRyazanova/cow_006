@@ -66,3 +66,15 @@ def test_update_score():
     assert player.score == initial_score + expected_row_score
     assert player.score == 16
 
+
+def test_add_card_to_hand():
+    initial_hand = Hand(cards=[Card(1), Card(2)])
+    player = Player(name='Ast', hand=initial_hand, score=0)
+    new_card = Card(3)
+
+    player.add_card_to_hand(new_card)
+
+    # Проверяем, что новая карта добавлена в руку игрока
+    assert len(player.hand.cards) == 3
+    assert new_card in player.hand.cards
+    assert player.hand.cards == [Card(1), Card(2), Card(3)]
