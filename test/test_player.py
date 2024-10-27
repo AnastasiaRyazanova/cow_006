@@ -78,3 +78,4 @@ def test_add_card_to_hand():
     assert len(player.hand.cards) == 3
     assert new_card in player.hand.cards
     assert player.hand.cards == [Card(1), Card(2), Card(3)]
+
