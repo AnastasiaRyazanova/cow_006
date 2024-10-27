@@ -89,34 +89,42 @@ def test_next_player(game):
 
 def test_play_card_1(game):
     """Если карта игрока подошла"""
-    card_to_play = ast.hand.cards[0]  # ast играет картой [82<1>]
-    assert game.current_player().hand.cards  # проверка, что у ast есть карты в руке
+    current_player = game.current_player()
+    selected_card = current_player.hand.cards[0]  # ast выбирает первую карту из руки
+    assert current_player.hand.cards  # проверка, что у ast есть карты в руке
 
+    game.table.add_selected_cards(current_player, selected_card)
     initial_table_state = game.table.save()  # сохр. текущее состояние стола
+    # print(table)
 
-    successful, points = game.play_card(card_to_play)
+    successful, points = game.play_card(selected_card)
     assert successful is True  # карта проигралась
-    assert card_to_play not in game.current_player().hand.cards  # проверяет, что карта больше не находится в руке
+    assert selected_card not in current_player.hand.cards  # проверяет, что карта больше не находится в руке
 
     new_table_state = game.table.save()  # проверка состояния стола после игры карты
     assert new_table_state != initial_table_state
-    # print(new_table_state)
+    assert repr(game.table[3]) == '[77<5>] [82<1>]'
+    # print(table)
     # print(game.current_player().hand.cards)
 
 
 # def test_play_card_2(game):
 #     """Если карта игрока не подошла"""
-#     card_to_play = ast.hand.cards[2]  # ast играет картой [35<2>]
-#     assert game.current_player().hand.cards
+#     current_player = game.current_player()
+#     selected_card = current_player.hand.cards[2]  # ast играет картой [35<2>]
+#     assert current_player.hand.cards
 #
+#     game.table.add_selected_cards(current_player, selected_card)
 #     initial_table_state = game.table.save()
+#     # print(table)
 #
-#     successful, points = game.play_card(card_to_play)
+#     successful, points = game.play_card(selected_card)
 #     assert successful is False  # карта не проигралась
-#     assert card_to_play in game.current_player().hand.cards
+#     assert selected_card in game.current_player().hand.cards
 #
 #     new_table_state = game.table.save()
 #     assert new_table_state == initial_table_state  # состояние стола пока не изменилось
+#     # print(table)
 
 
 def test_play_invalid_card(game):
