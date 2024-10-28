@@ -1,6 +1,8 @@
 from src.card import Card
+from src.row import Row
 from src.hand import Hand
 from src.table import Table
+from src.player import Player
 from src.player_interaction import PlayerInteraction
 import random
 
@@ -11,8 +13,9 @@ class Bot(PlayerInteraction):
             cls, hand: Hand, table: Table, hand_counts: list[int] | None = None
     ) -> Card:
         """Принимает решение, какую карту с руки играть"""
+        print("Карты бота", hand)
         chosen_card = random.choice(hand.cards)
-        print(f"Бот выбрал карту {chosen_card}")
+        # print(f"Бот выбрал карту {chosen_card}")
         return chosen_card
 
     @classmethod
@@ -22,5 +25,18 @@ class Bot(PlayerInteraction):
         print(f"Бот забирает ряд {chosen_row+1}")
         return chosen_row
 
+    @classmethod
+    def inform_card_chosen(cls, player: Player):
+        """
+        Сообщает, что игрок выбрал карту.
+        """
+        pass
+
+    @classmethod
+    def inform_row_chosen(cls, player: Player, row: int):
+        """
+        Сообщает, что игрок выбрал ряд.
+        """
+        pass
 
 

@@ -13,14 +13,14 @@ class Human(PlayerInteraction):
         while True:
             try:
                 print("Ваши карты", hand)
-                card_number = int(input("Введите номер карты"))
+                card_number = int(input("Введите номер карты: "))
                 for card in hand.cards:
                     if card.number == card_number:
                         # print(f"Игрок выбрал карту {card}")
                         return card
                 print(f"Карты {Card(card_number)} нет в руке")
             except ValueError:
-                print("Повторите ввод. Введите число, указывающее на номер карты")
+                print("Повторите ввод. Введите число, указывающее на номер карты ")
 
     @classmethod
     def choose_row(cls, table: Table, card: Card) -> int:
@@ -32,6 +32,6 @@ class Human(PlayerInteraction):
                     print(f"Игрок выбрал ряд {row_number+1}")
                     return row_number
                 else:
-                    print("Повторите ввод. Введите число, указывающее на номер ряда.")
+                    print("Повторите ввод. Введите число, указывающее на номер ряда ")
             except ValueError:
-                print("Повторите ввод. Введите число, указывающее на номер ряда.")
+                print("Повторите ввод. Введите число, указывающее на номер ряда ")
