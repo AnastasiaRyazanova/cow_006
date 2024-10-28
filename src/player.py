@@ -48,3 +48,5 @@ class Player:
         """Добавляет карту в руку игрока."""
         self.hand.add_card(card)
 
+    def __hash__(self):
+        return hash(self.name)
