@@ -85,14 +85,13 @@ class GameState:
         if card.number not in Card.NUMBERS:
             return False, 0
 
-        if card in self.current_player().hand.cards:
-            successful, points = self.table.add_card(card)
-            if successful:
-                self.current_player().hand.remove_card(card)
-                return successful, points
-        else:
+        if card not in self.current_player().hand.cards:
             raise ValueError(f"{self.current_player().name} не имеет карты {card} в руке.")
-        return False, 0
+
+        self.current_player().hand.remove_card(card)
+
+        successful, points = self.table.add_card(card)
+        return successful, points
 
     def is_game_over(self) -> bool:
         """Проверяет, закончилась ли игра."""
