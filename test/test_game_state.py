@@ -19,11 +19,13 @@ data = {
         {
             "name": "Ast",
             "hand": "[82<1>] [102<1>] [35<2>] [65<2>] [33<5>] [97<1>] [25<2>]",
+            # "is_human": True,
             "score": 0
         },
         {
             "name": "P1",
             "hand": "[12<1>] [71<1>] [5<2>] [81<1>] [3<1>] [22<5>] [26<1>]",
+            # "is_human": False,
             "score": 0
         }
     ]
@@ -87,25 +89,70 @@ def test_next_player(game):
     assert game.current_player().name == "Ast"
 
 
-def test_play_card_1(game):
-    """Если карта игрока подошла"""
-    current_player = game.current_player()
-    selected_card = current_player.hand.cards[0]  # ast выбирает первую карту из руки
-    assert current_player.hand.cards  # проверка, что у ast есть карты в руке
+def test_play_card_two_players(game):
+    """Тест для случая, когда играют два игрока."""
+    player1 = game.players[0]
+    player2 = game.players[1]
 
-    game.table.add_selected_cards(current_player, selected_card)
-    initial_table_state = game.table.save()  # сохр. текущее состояние стола
-    # print(table)
+    assert player1.hand.cards
+    assert player2.hand.cards
 
-    successful, points = game.play_card(selected_card)
-    assert successful is True  # карта проигралась
-    assert selected_card not in current_player.hand.cards  # проверяет, что карта больше не находится в руке
+    # Игрок 1 выбирает первую карту
+    card_to_play = player1.hand.cards[0]  # [82<1>]
+    game.table.add_selected_cards(player1, card_to_play)  # Добавляем карту игрока 1 в selected_cards
 
-    new_table_state = game.table.save()  # проверка состояния стола после игры карты
-    assert new_table_state != initial_table_state
-    assert repr(game.table[3]) == '[77<5>] [82<1>]'
-    # print(table)
-    # print(game.current_player().hand.cards)
+    game.next_player()
+    assert game.current_player() == player2
+
+    # Игрок 2 выбирает четвертую карту   # [81<1>]
+    card_to_play_player2 = player2.hand.cards[3]
+    game.table.add_selected_cards(player2, card_to_play_player2)  # Добавляем карту игрока 2 в selected_cards
+
+    card_numbers_in_selected = [card.number for _, card in game.table.selected_cards]
+    assert set(card_numbers_in_selected) == {81, 82}
+    print(table.selected_cards)
+
+    # Переходим к добавлению карт на стол
+    # successful_card1, points1 = game.table.add_card(card_to_play)  # Добавляем карту игрока 1
+    # successful_card2, points2 = game.table.add_card(card_to_play_player2)  # Добавляем карту игрока 2
+    for player, card in table.selected_cards:
+        successful, points = game.play_card(card)
+
+    # Проверяем, что обе карты были успешно добавлены на стол
+    # assert successful_card1 is True
+    # assert successful_card2 is False
+    assert repr(table[3]) == '[77<5>] [81<1>] [82<1>]'
+    print(table)
+    #
+    # Проверяем, что карты убраны из рук игроков
+    assert card_to_play not in player1.hand.cards  # Карта игрока 1 убрана из руки
+    assert card_to_play_player2 not in player2.hand.cards  # Карта игрока 2 убрана из руки
+
+    # Проверяем состояние стола
+    assert game.table.save()  # Проверить, что стол не пустой
+
+
+
+# def test_play_card_1(game):
+#     """Если карта игрока подошла"""
+#     current_player = game.current_player()
+#     selected_card = current_player.hand.cards[0]  # ast выбирает первую карту из руки
+#     assert current_player.hand.cards  # проверка, что у ast есть карты в руке
+#
+#     game.table.add_selected_cards(current_player, selected_card)
+#     initial_table_state = game.table.save()  # сохр. текущее состояние стола
+#     print(game.current_player().hand.cards)
+#     print(table)
+#
+#     successful, points = game.play_card(selected_card)
+#     assert successful is True  # карта проигралась
+#     assert selected_card not in current_player.hand.cards  # проверяет, что карта больше не находится в руке
+#
+#     new_table_state = game.table.save()  # проверка состояния стола после игры карты
+#     assert new_table_state != initial_table_state
+#     assert repr(game.table[3]) == '[77<5>] [82<1>]'
+#     print(table)
+#     print(game.current_player().hand.cards)
 
 
 # def test_play_card_2(game):

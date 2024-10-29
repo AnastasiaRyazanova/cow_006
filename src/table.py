@@ -18,6 +18,7 @@ class Table:
 
     def add_card(self, card: Card) -> (bool, int):
         """Добавляет карту в оптимальный ряд."""
+        # для заполнения стола в начале игры в game_server
         for row in self.rows:     # если в ряд пустой, то автоматически добавляется карта
             if not row.cards:
                 row.add_card(card)
@@ -26,33 +27,50 @@ class Table:
         if not self.selected_cards:
             return False, 0
 
-        player, card = self.selected_cards.pop(0)
+        for player, selected_card in self.selected_cards:
+            good_rows = []
 
-        for row in self.rows:  # если в ряд пустой, то автоматически добавляется карта
-            if not row.cards:
-                row.add_card(card)
-                return True, 0  # возвращается 0 штрафных очков
+            for row in self.rows:
+                if selected_card.can_play(row.cards[-1]):
+                    good_rows.append(row)
 
-        good_rows = []    # ряды, в которые можно добавить карту
+            # Если есть подходящие ряды, добавляем в оптимальный
+            if good_rows:
+                attached_row = min(good_rows, key=lambda r: abs(selected_card.number - r.cards[-1].number))
+                points = 0
+                if len(attached_row.cards) == Row.MAX_CARDS - 1:
+                    points = attached_row.score()
+                #    print(f"\nИгрок забрал ряд {self.rows.index(attached_row) + 1}. Получено очков: {points}")
+                    attached_row.clear()  # Очищаем ряд
 
-        for row in self.rows:
-            if card.can_play(row.cards[-1]):
-                good_rows.append(row)   # добавляется в список подходящих рядов
+                attached_row.add_card(selected_card)
+                self.selected_cards.remove((player, selected_card))  # Удаляем карту из выбранных
+                return True, points
 
-        if not good_rows:     # если нет подходящих рядов(номер карты меньше карт во всех рядах)
-            return False, 0      # возвращается 0 штрафных очков
+        return False, 0
 
-        attached_row = min(good_rows, key=lambda r: abs(card.number - r.cards[-1].number))     # оптимальный ряд
-                                                                                              # (разница номеров минимальная)
 
-        points = 0  # число очков, к-е затем добавятся в score игрока, забравшего ряд
-        if len(attached_row.cards) == Row.MAX_CARDS - 1:  # если карта игрока становится 6-й в ряду
-            points = attached_row.score()
-            print(f"\nИгрок забрал ряд {self.rows.index(attached_row) + 1}. Получено очков: {points}")
-            attached_row.clear()
-
-        attached_row.add_card(card)  # 6-я карта становится 1-й в ряду
-        return True, points
+        # player, card = self.selected_cards.pop(0)
+        #
+        # good_rows = []    # ряды, в которые можно добавить карту
+        #
+        # for row in self.rows:
+        #     if card.can_play(row.cards[-1]):
+        #         good_rows.append(row)   # добавляется в список подходящих рядов
+        #
+        # if not good_rows:     # если нет подходящих рядов(номер карты меньше карт во всех рядах)
+        #     return False, 0      # возвращается 0 штрафных очков
+        #
+        # attached_row = min(good_rows, key=lambda r: abs(card.number - r.cards[-1].number))     # оптимальный ряд
+        #                                                                                       # (разница номеров минимальная)
+        # points = 0  # число очков, к-е затем добавятся в score игрока, забравшего ряд
+        # if len(attached_row.cards) == Row.MAX_CARDS - 1:  # если карта игрока становится 6-й в ряду
+        #     points = attached_row.score()
+        #     print(f"\nИгрок забрал ряд {self.rows.index(attached_row) + 1}. Получено очков: {points}")
+        #     attached_row.clear()
+        #
+        # attached_row.add_card(card)  # 6-я карта становится 1-й в ряду
+        # return True, points
 
     def save(self) -> str:
         """Сохраняет состояние стола в виде JSON строки."""
