@@ -14,8 +14,10 @@ class Bot(PlayerInteraction):
     ) -> Card:
         """Принимает решение, какую карту с руки играть"""
         print("Карты бота", hand)
-        chosen_card = random.choice(hand.cards)
+        #chosen_card = random.choice(hand.cards)
         # print(f"Бот выбрал карту {chosen_card}")
+        # для отладки, я хочу уметь подобрать карты в json файле
+        chosen_card = hand.cards[0]
         return chosen_card
 
     @classmethod
