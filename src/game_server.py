@@ -86,11 +86,15 @@ class GameServer:
     @classmethod
     def new_game(cls, player_types: dict):
         deck = Deck(cards=None)
-        game_state = GameState(list(player_types.keys()), deck, Table())
-        return cls(player_types, game_state)
+        game_state: GameState = GameState(list(player_types.keys()), deck, Table())
+        gs = cls(player_types, game_state)
+        gs.start_game_phase()
+        gs.deal_cards_phase()
+        gs.fill_table_phase()
+        return gs
 
     def run(self):
-        current_phase = self.start_game_phase()
+        current_phase = GamePhase.DISPLAY_TABLE
         while current_phase != GamePhase.GAME_END:
             phases = {
                 GamePhase.DEAL_CARDS: self.deal_cards_phase,  # карты раздаются игрокам
@@ -159,10 +163,11 @@ class GameServer:
             print(f"{player.name}({player.score}): {card}")
 
         failed_additions = []
-
+        print(self.game_state.table.selected_cards)
         for player, card in self.game_state.table.selected_cards:
+            print(f'place_card_phase: player:{player.name} {card=}')
             try:
-                successful, points = self.game_state.play_card(card)
+                successful, points = self.game_state.play_card(card, player)
                 self.inform_all("inform_card_played", card)
                 if successful:
                     print(f'Добавили карту {card}')
@@ -261,16 +266,18 @@ class GameServer:
 
 
 def __main__():
-    load_from_file = False  # True - загрузить игру
+    load_from_file = True  # True - загрузить игру
     if load_from_file:
         server = GameServer.load_game()
-        server.save()
     else:
         server = GameServer.new_game(GameServer.get_players())
+    server.save()
     server.run()
 
 
 if __name__ == "__main__":
+    import random
+    random.seed(7)
     __main__()
 
 
