@@ -42,6 +42,7 @@ def test_add_card():
     card4 = table.add_selected_cards(player1, Card(83))
     card5 = table.add_selected_cards(player1, Card(90))
     card6 = table.add_selected_cards(player1, Card(91))
+    # print(table.selected_cards)
 
     # Добавление карт в ряды
     table.add_card(Card(10))  # добавляется в 1 ряд

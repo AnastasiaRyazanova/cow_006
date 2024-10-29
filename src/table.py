@@ -28,7 +28,7 @@ class Table:
             return False, 0
 
         for player, selected_card in self.selected_cards:
-            good_rows = []
+            good_rows = []    # ряды, в которые можно добавить карту
 
             for row in self.rows:
                 if selected_card.can_play(row.cards[-1]):
@@ -48,7 +48,6 @@ class Table:
                 return True, points
 
         return False, 0
-
 
         # player, card = self.selected_cards.pop(0)
         #
