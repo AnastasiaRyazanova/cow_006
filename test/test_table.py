@@ -118,4 +118,3 @@ def test_repr():
 
     expected_repr = f"r1: [{card1.number}<{card1.rank}>]\nr2: [{card2.number}<{card2.rank}>]\nr3: \nr4: "
     assert repr(table) == expected_repr
-
