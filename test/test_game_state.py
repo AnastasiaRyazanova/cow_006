@@ -99,24 +99,24 @@ def test_play_card_two_players(game):
 
     # Игрок 1 выбирает первую карту
     card_to_play = player1.hand.cards[0]  # [82<1>]
-    game.table.add_selected_cards(player1, card_to_play)  # Добавляем карту игрока 1 в selected_cards
+    game.table.add_selected_cards(card_to_play, player1)  # Добавляем карту игрока 1 в selected_cards
 
     game.next_player()
     assert game.current_player() == player2
 
     # Игрок 2 выбирает четвертую карту   # [81<1>]
     card_to_play_player2 = player2.hand.cards[3]
-    game.table.add_selected_cards(player2, card_to_play_player2)  # Добавляем карту игрока 2 в selected_cards
+    game.table.add_selected_cards(card_to_play_player2, player2)  # Добавляем карту игрока 2 в selected_cards
 
-    card_numbers_in_selected = [card.number for _, card in game.table.selected_cards]
+    card_numbers_in_selected = [selected_card.number for selected_card, _ in game.table.selected_cards]
     assert set(card_numbers_in_selected) == {81, 82}
     print(table.selected_cards)
 
     # Переходим к добавлению карт на стол
     # successful_card1, points1 = game.table.add_card(card_to_play)  # Добавляем карту игрока 1
     # successful_card2, points2 = game.table.add_card(card_to_play_player2)  # Добавляем карту игрока 2
-    for player, card in table.selected_cards:
-        successful, points = game.play_card(card)
+    for card, player in table.selected_cards:
+        successful, points = game.play_card(card, player)
 
     # Проверяем, что обе карты были успешно добавлены на стол
     # assert successful_card1 is True
@@ -132,19 +132,18 @@ def test_play_card_two_players(game):
     assert game.table.save()  # Проверить, что стол не пустой
 
 
-
 # def test_play_card_1(game):
 #     """Если карта игрока подошла"""
 #     current_player = game.current_player()
 #     selected_card = current_player.hand.cards[0]  # ast выбирает первую карту из руки
 #     assert current_player.hand.cards  # проверка, что у ast есть карты в руке
 #
-#     game.table.add_selected_cards(current_player, selected_card)
+#     game.table.add_selected_cards(selected_card, current_player)
 #     initial_table_state = game.table.save()  # сохр. текущее состояние стола
 #     print(game.current_player().hand.cards)
 #     print(table)
 #
-#     successful, points = game.play_card(selected_card)
+#     successful, points = game.play_card(selected_card, current_player)
 #     assert successful is True  # карта проигралась
 #     assert selected_card not in current_player.hand.cards  # проверяет, что карта больше не находится в руке
 #
@@ -158,20 +157,22 @@ def test_play_card_two_players(game):
 # def test_play_card_2(game):
 #     """Если карта игрока не подошла"""
 #     current_player = game.current_player()
-#     selected_card = current_player.hand.cards[2]  # ast играет картой [35<2>]
+#     card = current_player.hand.cards[2]  # ast играет картой [35<2>]
 #     assert current_player.hand.cards
+#     assert card in current_player.hand.cards
 #
-#     game.table.add_selected_cards(current_player, selected_card)
+#     table.add_selected_cards(card, current_player)
+#     assert (card, current_player) in table.selected_cards
+#
 #     initial_table_state = game.table.save()
-#     # print(table)
+#     successful, points = game.play_card(card, current_player)
 #
-#     successful, points = game.play_card(selected_card)
 #     assert successful is False  # карта не проигралась
-#     assert selected_card in game.current_player().hand.cards
+#     assert card not in current_player.hand.cards  # карта удалилась из руки
 #
 #     new_table_state = game.table.save()
-#     assert new_table_state == initial_table_state  # состояние стола пока не изменилось
-#     # print(table)
+#     assert new_table_state == initial_table_state  # состояние стола не изменилось
+#     print(table)
 
 
 def test_play_invalid_card(game):
