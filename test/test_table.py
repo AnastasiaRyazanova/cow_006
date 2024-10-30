@@ -23,28 +23,23 @@ def test_add_selected_cards():
     card2 = Card(20)  # 3
     card3 = Card(15)  # 2
 
-    table.add_selected_cards(player1, card1)
-    table.add_selected_cards(player2, card2)
-    table.add_selected_cards(player1, card3)
+    table.add_selected_cards(card1, player1)
+    table.add_selected_cards(card2, player2)
+    table.add_selected_cards(card3, player1)
 
     # проверяем, что карты отсортированы по возрастанию
-    assert table.selected_cards == [(player1, card1), (player1, card3), (player2, card2)]
+    assert table.selected_cards == [(card1, player1), (card3, player1), (card2, player2)]
 
 
 def test_add_card():
     table = Table()
-    hand1 = Hand()
-    player1 = Player("P1", hand1)
-    # Добавление выбранных карт
-    card1 = table.add_selected_cards(player1, Card(55))
-    card2 = table.add_selected_cards(player1, Card(76))
-    card3 = table.add_selected_cards(player1, Card(77))
-    card4 = table.add_selected_cards(player1, Card(83))
-    card5 = table.add_selected_cards(player1, Card(90))
-    card6 = table.add_selected_cards(player1, Card(91))
-    # print(table.selected_cards)
+    card1 = Card(55)
+    card2 = Card(76)
+    card3 = Card(77)
+    card4 = Card(83)
+    card5 = Card(90)
+    card6 = Card(91)
 
-    # Добавление карт в ряды
     table.add_card(Card(10))  # добавляется в 1 ряд
     table.add_card(Card(25))  # во 2 ряд
     table.add_card(Card(41))  # в 3 ряд
@@ -68,14 +63,11 @@ def test_add_card():
 def test_save():
     """Тестируем сохранение состояния стола."""
     table = Table()
-    hand1 = Hand()
-    player1 = Player("P1", hand1)
-    card1 = table.add_selected_cards(player1, Card(55))
-    card2 = table.add_selected_cards(player1, Card(76))
-    card3 = table.add_selected_cards(player1, Card(77))
-    card4 = table.add_selected_cards(player1, Card(83))
-    card5 = table.add_selected_cards(player1, Card(90))
-    card6 = table.add_selected_cards(player1, Card(91))
+    card1 = Card(55)
+    card2 = Card(76)
+    card3 = Card(77)
+    card4 = Card(83)
+    card5 = Card(90)
 
     # Добавление карт
     table.add_card(Card(10))  # добавляется в 1 ряд
