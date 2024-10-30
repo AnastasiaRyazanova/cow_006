@@ -44,14 +44,14 @@ class Table:
         return True, points
 
     def save(self) -> str:
-        """Сохраняет состояние стола в виде JSON строки."""
+        """Сохраняет состояние стола в виде JSON строки"""
         return json.dumps(
             {f"row{i + 1}": self.rows[i].save() for i in range(len(self.rows))}
         )
 
     @classmethod
     def load(cls, data: dict) -> 'Table':
-        """Загружает состояние стола из предоставленных данных."""
+        """Загружает состояние стола из предоставленных данных"""
         table = cls()
         for row_key, cards_str in data.items():
             row = Row.load(cards_str)
