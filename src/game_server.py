@@ -46,7 +46,7 @@ class GameServer:
 
     @classmethod
     def load_game(cls):
-        filename = 'cow.json'
+        filename = 'cow_2bots.json'
         with open(filename, 'r') as fin:
             data = json.load(fin)
             game_state = GameState.load(data)
@@ -66,7 +66,7 @@ class GameServer:
         return data
 
     def save(self):
-        filename = 'cow.json'
+        filename = 'cow_2bots.json'
         data = self.save_to_dict()
         with open(filename, 'w') as fout:
             json.dump(data, fout, indent=4)
@@ -258,7 +258,7 @@ class GameServer:
 
 
 def __main__():
-    load_from_file = True  # True - загрузить игру
+    load_from_file = False  # True - загрузить игру
     if load_from_file:
         server = GameServer.load_game()
     else:
@@ -269,6 +269,6 @@ def __main__():
 
 
 if __name__ == "__main__":
-    import random
-    random.seed(7)
+    # import random
+    # random.seed(7)
     __main__()

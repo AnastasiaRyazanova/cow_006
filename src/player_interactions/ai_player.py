@@ -14,19 +14,19 @@ class Bot(PlayerInteraction):
     ) -> Card:
         """Принимает решение, какую карту с руки играть"""
         print("Карты бота", hand)
-        # chosen_card = random.choice(hand.cards)
-        # print(f"Бот выбрал карту {chosen_card}")
+        chosen_card = random.choice(hand.cards)
+        print(f"Бот выбрал карту {chosen_card}")
 
-        """# для теста 2 ботов"""
-        chosen_card = hand.cards[0]
+        # """# для теста 2 ботов"""
+        # chosen_card = hand.cards[0]
         return chosen_card
 
     @classmethod
     def choose_row(cls, table: Table, card: Card) -> int:
         """Здесь выбор ряда, который забирает Бот"""
-        """для теста выбирает 2 ряд"""
-        chosen_row = 1
-        # chosen_row = random.randint(0, len(table.rows) - 1)
+        # """для теста выбирает 2 ряд"""
+        # chosen_row = 1
+        chosen_row = random.randint(0, len(table.rows) - 1)
         print(f"\tБот выбрал ряд {chosen_row+1}")
         return chosen_row
 
