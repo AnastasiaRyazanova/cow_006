@@ -38,15 +38,25 @@ class GameServer:
         player_count = cls.request_player_count()
 
         player_types = {}
-        for p in range(player_count):
+        names_count = {}  # для хранения счетчиков имен игроков
+        for _ in range(player_count):
             name, kind = cls.request_player()
-            player = Player(name, Hand())
+
+            # если есть ли игроки с таким же именем, то увеличиваем счетчик
+            if name in names_count:
+                names_count[name] += 1
+                unique_name = f"[{names_count[name]}]{name}"  # уникальное имя
+            else:
+                names_count[name] = 1
+                unique_name = name  # Имя уникально
+
+            player = Player(unique_name, Hand())
             player_types[player] = kind
         return player_types
 
     @classmethod
     def load_game(cls):
-        filename = 'cow_2bots.json'
+        filename = 'cow.json'
         with open(filename, 'r') as fin:
             data = json.load(fin)
             game_state = GameState.load(data)
@@ -66,7 +76,7 @@ class GameServer:
         return data
 
     def save(self):
-        filename = 'cow_2bots.json'
+        filename = 'cow.json'
         data = self.save_to_dict()
         with open(filename, 'w') as fout:
             json.dump(data, fout, indent=4)
@@ -96,6 +106,8 @@ class GameServer:
             current_phase = phases[current_phase]()
 
     def start_game_phase(self) -> GamePhase:
+        print("\n===НАЧАЛО ИГРЫ===")
+        print("----------------------------------------")
         print("Master: Начинаем игру!")
         self.game_state.deck.shuffle()
         print("Master: Колода перемешана.")
@@ -121,7 +133,7 @@ class GameServer:
     def display_table_state(self):  # отображение состояние стола
         self.turn_number += 1
         if self.turn_number <= self.INITIAL_HAND_SIZE:
-            print(f"\nХОД {self.turn_number}:\nСостояние стола:")
+            print(f"\n===ХОД {self.turn_number}===\nСостояние стола:")
             print(self.game_state.table)
             print("\nMaster: Игроки выбирают карту")
             return GamePhase.CHOOSE_CARD
@@ -136,7 +148,7 @@ class GameServer:
         card = self.player_types[current_player].choose_card(current_player.hand, self.game_state.table)  # выбор
         self.inform_all("inform_card_chosen", current_player)
         if card:
-            print(f"{current_player.name}({current_player.score}): выбирает карту {card}")  # убрать
+            # print(f"{current_player.name}({current_player.score}): выбирает карту {card}")  # убрать
             self.game_state.table.add_selected_cards(card, current_player)  # добавляется в selected_cards
 
         if len(self.game_state.table.selected_cards) == len(self.player_types):  # пока все игроки не выберут карты
@@ -149,8 +161,7 @@ class GameServer:
             self.game_state.next_player()
             return GamePhase.CHOOSE_CARD
         else:
-            print(f"\nХод {self.turn_number}")
-            print("КОНЕЦ ИГРЫ")
+            print("\n===КОНЕЦ ИГРЫ===")
             print("Состояние стола:")
             print(self.game_state.table)
             return GamePhase.DECLARE_WINNER
@@ -162,7 +173,7 @@ class GameServer:
         print("----------------------------------")
         failed_additions = []
 
-        print(self.game_state.table.selected_cards)
+        # print(self.game_state.table.selected_cards)
         for card, player in self.game_state.table.selected_cards:
             print(f'{player.name}({player.score}): добавление карты {card}')
             try:
@@ -208,11 +219,15 @@ class GameServer:
 
     def declare_winner_phase(self) -> GamePhase:
         print("Master: Игра закончена! Результаты игры: ")
-        winner = self.game_state.find_winner()[1]
-        print(f"\t{winner.name}({winner.score}) стал победителем!")
-
-        print(f"\tОстальные игроки: ")
-        remaining_players = [player for player in self.player_types.keys() if player != winner]
+        one_winner, winners = self.game_state.find_winner()
+        if one_winner:
+            print("Победитель: ")
+        else:
+            print("Победители: ")
+        for winner in winners:
+            print(f"\t{winner.name}({winner.score})")
+        print(f"Остальные игроки: ")
+        remaining_players = [player for player in self.player_types.keys() if player not in winners]
         sorted_remaining_players = sorted(remaining_players, key=lambda player: player.score)
         for player in sorted_remaining_players:
             print(f"\t{player.name}({player.score})")
@@ -239,7 +254,7 @@ class GameServer:
             print("Не удалось определить типы игроков. Убедитесь, что классы PlayerInteraction правильно определены.")
             sys.exit(1)
 
-        player_types_as_str = ', '.join(player_types.keys())
+        abbreviations = {'H': 'Human', 'h': 'Human', 'Р': 'Human', 'р': 'Human', 'B': 'Bot', 'b': 'Bot', 'И': 'Bot', 'и': 'Bot'}
 
         while True:
             name = input("Введите имя игрока: ")
@@ -248,27 +263,27 @@ class GameServer:
             print("Имя должно быть одним словом, только буквенные символы.")
 
         while True:
-            kind = input(f"Выберите тип игрока ({player_types_as_str}): ")
-            if kind in player_types:
-                kind = player_types[kind]
+            kind = input(f"Выберите тип игрока: H/h для Human, B/b для Bot: ")
+            if kind in abbreviations:
+                kind = player_types[abbreviations[kind]]
                 break
-            print(f"Разрешенные типы игроков: {player_types_as_str}.")
+            print(f"Разрешенные типы игроков: H/h для Human, B/b для Bot.")
 
         return name, kind
 
 
 def __main__():
-    load_from_file = False  # True - загрузить игру
+    load_from_file = True  # True - загрузить игру
     if load_from_file:
         server = GameServer.load_game()
+        server.run()
     else:
         server = GameServer.new_game(GameServer.get_players())
         server.save()
         server.run()
-    server.run()
 
 
 if __name__ == "__main__":
-    # import random
-    # random.seed(7)
+    import random
+    random.seed(7)
     __main__()

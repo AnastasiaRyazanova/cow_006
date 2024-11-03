@@ -103,6 +103,6 @@ class GameState:
         winners = [player for player in self.players if player.score == min_score]  #список игроков с минимальным количеством очков
 
         if len(winners) == 1:  #если победитель 1
-            return True, winners[0]
+            return True, winners
         else:
             return False, winners
