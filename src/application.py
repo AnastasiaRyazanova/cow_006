@@ -9,13 +9,14 @@ class Application:
         pygame.init()
         self.size = (self.width, self.height) = (RSC['width'], RSC['height'])
         self.display = pygame.display.set_mode(self.size)
-        self.display.fill('gray', (0, 0, self.width, self.height))
+        self.display.fill(ViewGame.DISPLAY_COLOR, (0, 0, self.width, self.height))
         pygame.display.set_caption("COW_006")
         icon_img = pygame.image.load('img/icon.png')
         pygame.display.set_icon(icon_img)
         self.vgame = ViewGame()
 
     def run(self):
+        clock = pygame.time.Clock()
         running = True
         pygame.display.update()
         while running:
@@ -24,12 +25,12 @@ class Application:
             # отрисовка изменений
             self.vgame.redraw(self.display)
             # реакция на кравиши и мышь
-            #
             for event in pygame.event.get():
                 if (event.type == pygame.QUIT
                         or event.type == pygame.KEYDOWN and event.key == pygame.K_q):
                     running = False
                 self.vgame.event_processing(event)
+            clock.tick(RSC['FPS'])
 
 
 if __name__ == '__main__':
