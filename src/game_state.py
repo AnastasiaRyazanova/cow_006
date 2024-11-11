@@ -1,5 +1,4 @@
 from src.card import Card
-from src.deck import Deck
 from src.player import Player
 from src.table import Table
 
@@ -13,7 +12,6 @@ class GameState:
         "row3": "[80<3>] [99<5>] [101<1>]",
         "row4": "[77<5>]",
     },
-    "deck": "",
     "current_player_index": 0,
     "players": [
         {
@@ -31,10 +29,9 @@ class GameState:
     """
 
     def __init__(
-        self, players: list[Player], deck: Deck, table: Table, current_player: int = 0
+        self, players: list[Player], table: Table, current_player: int = 0
     ):
         self.players: list[Player] = players
-        self.deck: Deck = deck
         self.table: Table = table
         self._current_player: int = current_player
 
@@ -48,8 +45,6 @@ class GameState:
             return False
         if self.players != other.players:
             return False
-        if self.deck != other.deck:
-            return False
         if self.table != other.table:
             return False
         return True
@@ -57,7 +52,6 @@ class GameState:
     def save(self) -> dict:
         return {
             "table": {f"row{i + 1}": self.table[i].save() for i in range(len(self.table.rows))},
-            "deck": str(self.deck),
             "current_player_index": self._current_player,
             "players": [p.save() for p in self.players],
         }
@@ -66,12 +60,10 @@ class GameState:
     def load(cls, data: dict):
         players = [Player.load(p) for p in data["players"]]
         table = Table.load(data["table"])
-        deck = Deck.load(data["deck"])
         current_player = int(data["current_player_index"])
 
         return cls(
             players=players,
-            deck=deck,
             table=table,
             current_player=current_player,
         )
@@ -106,3 +98,4 @@ class GameState:
             return True, winners
         else:
             return False, winners
+

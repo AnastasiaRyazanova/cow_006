@@ -16,8 +16,6 @@ import src.player_interactions as all_player_types
 
 class GamePhase(enum.StrEnum):
     START_GAME = "Start game"
-    DEAL_CARDS = "Deal cards"
-    FILL_TABLE = "Place cards on the table"
     DISPLAY_TABLE = "Display table state"
     CHOOSE_CARD = "Choose card"
     PLACE_CARD = "Place card"
@@ -82,49 +80,45 @@ class GameServer:
 
     @classmethod
     def new_game(cls, player_types: dict):
-        deck = Deck(cards=None)
-        game_state: GameState = GameState(list(player_types.keys()), deck, Table())
+        game_state: GameState = GameState(list(player_types.keys()), Table())
         gs = cls(player_types, game_state)
-        gs.start_game_phase()
-        gs.deal_cards_phase()
-        gs.fill_table_phase()
+        gs.deal_start_game_phase()
         return gs
 
     def run(self):
         current_phase = GamePhase.DISPLAY_TABLE
         while current_phase != GamePhase.GAME_END:
             phases = {
-                GamePhase.DEAL_CARDS: self.deal_cards_phase,  # карты раздаются игрокам
-                GamePhase.FILL_TABLE: self.fill_table_phase,  # заполнение стола (в начале игры)
                 GamePhase.DISPLAY_TABLE: self.display_table_state,  # отображение состояние стола
                 GamePhase.CHOOSE_CARD: self.choose_card_phase,  # игроки выбирают карты, карты добавляются в selected_cards класса table
-                GamePhase.PLACE_CARD: self.place_card_phase,  # карты из selected_cards кладут в ряды стола!!&?
-                GamePhase.NEXT_PLAYER: self.next_player_phase,  # ?
+                GamePhase.PLACE_CARD: self.place_card_phase,
+                GamePhase.NEXT_PLAYER: self.next_player_phase,
                 GamePhase.DECLARE_WINNER: self.declare_winner_phase,  # пока у игроков не закончатся карты/пока не будет 66 очков
             }
             current_phase = phases[current_phase]()
 
-    def start_game_phase(self) -> GamePhase:
+    def deal_start_game_phase(self) -> GamePhase:
         print("\n===НАЧАЛО ИГРЫ===")
         print("----------------------------------------")
         print("Master: Начинаем игру!")
-        self.game_state.deck.shuffle()
-        print("Master: Колода перемешана.")
-        return GamePhase.DEAL_CARDS
 
-    def deal_cards_phase(self) -> GamePhase:  # карты раздаются игрокам
+        # перемешиваем колоду
+        deck = Deck(cards=None)
+        deck.shuffle()
+        print("Master: Колода перемешана.")
+
+        # раздаем карты игрокам
         for _ in range(self.INITIAL_HAND_SIZE):
             for player in self.player_types.keys():
-                card = self.game_state.deck.draw_card()
+                card = deck.draw_card()
                 if card:
                     player.hand.add_card(card)
         print("Master: Карты разданы игрокам.")
-        return GamePhase.FILL_TABLE
 
-    def fill_table_phase(self) -> GamePhase:  # заполнение стола (в начале игры)
+        # заполнение стола
         for _ in range(len(self.game_state.table.rows)):
-            if self.game_state.deck.cards:
-                card = self.game_state.deck.draw_card()
+            if deck.cards:
+                card = deck.draw_card()
                 self.game_state.table.add_card(card)
         print("Master: Карты добавлены на стол.")
         return GamePhase.DISPLAY_TABLE
@@ -272,19 +266,20 @@ class GameServer:
 
 
 def __main__():
-    load_from_file = True  # True - загрузить игру
+    load_from_file = False  # True - загрузить игру
     filename_to_load = 'cow_2bots.json'
     filename_to_save = 'cow2bots.json'
     if load_from_file:
         server = GameServer.load_game(filename_to_load)
         server.run()
+        server.save(filename_to_save)
     else:
         server = GameServer.new_game(GameServer.get_players())
-    server.save(filename_to_save)
-    server.run()
+        server.save('cow1.json')
+        server.run()
 
 
 if __name__ == "__main__":
-    import random
-    random.seed(7)
+    # import random
+    # random.seed(7)
     __main__()
