@@ -272,14 +272,15 @@ class GameServer:
 
 
 def __main__():
-    load_from_file = False  # True - загрузить игру
-    filename = 'cow.json'
+    load_from_file = True  # True - загрузить игру
+    filename_to_load = 'cow_2bots.json'
+    filename_to_save = 'cow2bots.json'
     if load_from_file:
-        server = GameServer.load_game(filename)
+        server = GameServer.load_game(filename_to_load)
         server.run()
     else:
         server = GameServer.new_game(GameServer.get_players())
-    server.save(filename)
+    server.save(filename_to_save)
     server.run()
 
 
