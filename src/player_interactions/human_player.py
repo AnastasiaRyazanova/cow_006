@@ -18,7 +18,6 @@ class Human(PlayerInteraction):
                     if card.number == card_number:
                         # print(f"Игрок выбрал карту {card}")
                         return card
-                print(f"Карты {Card(card_number)} нет в руке")
             except ValueError:
                 print("Повторите ввод. Введите число, указывающее на номер карты ")
 
