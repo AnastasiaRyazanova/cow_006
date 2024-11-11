@@ -2,6 +2,7 @@ import inspect
 import json
 import sys
 import enum
+from pathlib import Path
 from src.deck import Deck
 from src.game_state import GameState
 from src.table import Table
@@ -55,8 +56,7 @@ class GameServer:
         return player_types
 
     @classmethod
-    def load_game(cls):
-        filename = 'cow.json'
+    def load_game(cls, filename: str | Path):
         with open(filename, 'r') as fin:
             data = json.load(fin)
             game_state = GameState.load(data)
@@ -75,8 +75,7 @@ class GameServer:
             data['players'][player_index]['kind'] = self.player_types[player].__name__
         return data
 
-    def save(self):
-        filename = 'cow.json'
+    def save(self, filename: str | Path):
         data = self.save_to_dict()
         with open(filename, 'w') as fout:
             json.dump(data, fout, indent=4)
@@ -138,7 +137,7 @@ class GameServer:
             print("\nMaster: Игроки выбирают карту")
             return GamePhase.CHOOSE_CARD
         else:
-            return GamePhase.DECLARE_WINNER
+            return GamePhase.GAME_END
 
     def choose_card_phase(self) -> GamePhase:  # игроки выбирают карты
 
@@ -273,14 +272,15 @@ class GameServer:
 
 
 def __main__():
-    load_from_file = True  # True - загрузить игру
+    load_from_file = False  # True - загрузить игру
+    filename = 'cow.json'
     if load_from_file:
-        server = GameServer.load_game()
+        server = GameServer.load_game(filename)
         server.run()
     else:
         server = GameServer.new_game(GameServer.get_players())
-        server.save()
-        server.run()
+    server.save(filename)
+    server.run()
 
 
 if __name__ == "__main__":
