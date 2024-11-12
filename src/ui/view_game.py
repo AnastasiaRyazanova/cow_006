@@ -7,7 +7,7 @@ from src.row import Row
 from src.table import Table
 from src.ui.view_card import ViewCard, Fly
 from src.ui.view_hand import ViewHand
-from src.ui.view_row import ViewRow  # Предположим, вы импортировали ViewRow
+from src.ui.view_row import ViewRow
 from src.ui.view_table import ViewTable
 
 
@@ -27,6 +27,19 @@ class ViewGame:
         for i in range(1, 10):
             row.add_card(Card(i))
         self.vrow = ViewRow(row, rrow)
+
+        if len(row.cards) >= 5:  # 5 карт в верхнем ряду карт, выбранных игроками
+            upper_row = Row()
+            lower_row = Row()
+            upper_row.cards = row.cards[:5]
+            lower_row.cards = row.cards[5:]
+
+            self.vrow = ViewRow(upper_row, rrow)
+            new_rrow = pygame.Rect(rrow.x, rrow.y + ViewCard.HEIGHT + self.YGAP, rrow.width, rrow.height)
+            self.vrow2 = ViewRow(lower_row, new_rrow)
+        else:
+            self.vrow = ViewRow(row, rrow)
+            self.vrow2 = None
 
         data = {
             "row1": "[11<1>] [24<1>] [33<5>]",
@@ -54,6 +67,8 @@ class ViewGame:
         display.fill(self.DISPLAY_COLOR)
         self.vhand.redraw(display)
         self.vrow.redraw(display)
+        if self.vrow2:  # если есть 2 ряд(т.е карт было больше 5)
+            self.vrow2.redraw(display)
         self.vtable.redraw(display)
         self.fly.redraw(display)
         pygame.display.update()
@@ -63,5 +78,7 @@ class ViewGame:
             return
         self.vhand.event_processing(event)
         self.vrow.event_processing(event)
+        if self.vrow2:  # для второго ряда выбранных карт
+            self.vrow2.event_processing(event)
         self.vtable.event_processing(event)
 
