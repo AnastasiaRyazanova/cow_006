@@ -8,6 +8,15 @@ class Hand:
             cards = []
         self.cards: list[Card] = cards
 
+    def __getitem__(self, item):
+        return self.cards[item]
+
+    def __len__(self):
+        return len(self.cards)
+
+    def __iter__(self):
+        return iter(self.cards)
+
     def __repr__(self):
         return self.save()
 

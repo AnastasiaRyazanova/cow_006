@@ -8,9 +8,9 @@ class Row:
         self.cards: list[Card] = []
 
     def add_card(self, card: Card) -> bool:
-        if not self.cards or card.can_play(self.cards[-1]): #если ряд пустой или карта проходит проверку(ее номер больше)
+        if not self.cards or card.can_play(self.cards[-1]):  # если ряд пустой или карта проходит проверку(ее номер больше)
             self.cards.append(card)
-            return True #то можно добавить в ряд
+            return True  # то можно добавить в ряд
         return False
 
     def score(self) -> int:

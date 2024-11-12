@@ -1,32 +1,67 @@
 import pygame
 
 from src.card import Card
+from src.hand import Hand
+from src.deck import Deck
+from src.row import Row
+from src.table import Table
 from src.ui.view_card import ViewCard, Fly
+from src.ui.view_hand import ViewHand
+from src.ui.view_row import ViewRow  # Предположим, вы импортировали ViewRow
+from src.ui.view_table import ViewTable
 
 
 class ViewGame:
     DISPLAY_COLOR = 'azure3'
+    YGAP = 0
+    XGAP = 30
 
     def __init__(self):
-        self.vcard = ViewCard(Card(4), x=20, y=30)
+        # Существующие инициализации
         self.fly = Fly()
+        rplayer1, rrow, rtable = self.calculate_geom_contants()
+        self.vhand = ViewHand(Hand.load('[13<1>] [31<1>] [10<2>] [6<1>] [17<1>] [18<1>] '
+                                        '[101<1>] [104<1>] [93<1>] [1<1>]'), rplayer1)
+
+        row = Row()
+        for i in range(1, 10):
+            row.add_card(Card(i))
+        self.vrow = ViewRow(row, rrow)
+
+        data = {
+            "row1": "[11<1>] [24<1>] [33<5>]",
+            "row2": "[5<1>] [6<1>] [7<2>] [8<1>] [99<5>]",
+            "row3": "[20<1>] [21<2>] [32<1>]",
+            "row4": "[45<1>] [56<1>]"
+        }
+        table = Table.load(data)
+        self.vtable = ViewTable(table, rtable)
+
+    def calculate_geom_contants(self):
+        screen_width, screen_height = pygame.display.get_window_size()
+        card_width = ViewCard.WIDTH
+        card_height = ViewCard.HEIGHT
+        self.YGAP = (screen_height - 5 * card_height) // 4
+        rplayer = pygame.Rect(self.XGAP, self.YGAP, screen_width - 2*self.XGAP, self.YGAP + card_height)
+        rrow = pygame.Rect(self.XGAP + card_width*8, self.YGAP + card_height * 2, rplayer.width, card_height)
+        rtable = pygame.Rect(self.XGAP, self.YGAP + 1.5*card_height, screen_width - 2*self.XGAP, self.YGAP)
+        return rplayer, rrow, rtable
 
     def model_update(self):
         self.fly.fly()
 
     def redraw(self, display: pygame.Surface):
         display.fill(self.DISPLAY_COLOR)
-        self.vcard.redraw(display)
+        self.vhand.redraw(display)
+        self.vrow.redraw(display)
+        self.vtable.redraw(display)
         self.fly.redraw(display)
         pygame.display.update()
 
     def event_processing(self, event: pygame.event.Event):
         if self.fly.animation_mode:
             return
-        self.vcard.event_processing(event)
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-            self.fly.begin(vcard=self.vcard, finish=(400, 300))
-
-
-
+        self.vhand.event_processing(event)
+        self.vrow.event_processing(event)
+        self.vtable.event_processing(event)
 
