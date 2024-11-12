@@ -82,3 +82,4 @@ class ViewGame:
             self.vrow2.event_processing(event)
         self.vtable.event_processing(event)
 
+
