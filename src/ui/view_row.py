@@ -9,6 +9,7 @@ import pygame
 class ViewRow:
     def __init__(self, row: Row, bound: pygame.Rect):
         self.vrow: list[ViewRow] = self.create_view_row(row, bound)
+
     def redraw(self, display: pygame.Surface):
         for vc in self.vrow:
             vc.redraw(display)
