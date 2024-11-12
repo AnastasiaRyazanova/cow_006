@@ -14,7 +14,7 @@ class Human(PlayerInteraction):
             try:
                 print("Ваши карты: ", hand)
                 card_number = int(input("Введите номер карты: "))
-                for card in hand.cards:
+                for card in hand:
                     if card.number == card_number:
                         # print(f"Игрок выбрал карту {card}")
                         return card
