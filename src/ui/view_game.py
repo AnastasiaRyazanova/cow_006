@@ -7,6 +7,7 @@ from src.row import Row
 from src.table import Table
 from src.ui.view_card import ViewCard, Fly
 from src.ui.view_hand import ViewHand
+from src.ui.view_players import ViewPlayers
 from src.ui.view_row_of_sel_cards import ViewSelCards
 from src.ui.view_row import ViewRow
 from src.ui.view_table import ViewTable
@@ -22,7 +23,7 @@ class ViewGame:
         # Существующие инициализации
         self.game = game_server
         self.fly = Fly()
-        rplayer1, rscards, rtable = self.calculate_geom_contants()
+        rplayer1, rscards, rtable, rplayers = self.calculate_geom_contants()
         game = game_server.game_state
 
         self.v_hand = ViewHand(game.players[0].hand, rplayer1)
@@ -30,6 +31,8 @@ class ViewGame:
         self.v_s_cards = ViewSelCards(game.table.selected_cards, rscards)
 
         self.v_table = ViewTable(game.table, rtable)
+
+        self.v_players = ViewPlayers(game.players, rplayers)
 
     def calculate_geom_contants(self):
         screen_width, screen_height = pygame.display.get_window_size()
@@ -39,7 +42,8 @@ class ViewGame:
         rplayer = pygame.Rect(self.XGAP, self.YGAP, screen_width - 2*self.XGAP, self.YGAP + card_height)
         rscards = pygame.Rect(self.XGAP + card_width*8, self.YGAP + card_height * 2, rplayer.width, card_height)
         rtable = pygame.Rect(self.XGAP, self.YGAP + 1.5*card_height, screen_width - 2*self.XGAP, self.YGAP)
-        return rplayer, rscards, rtable
+        rplayers = pygame.Rect(screen_width - 150, self.YGAP, 150, screen_height)
+        return rplayer, rscards, rtable, rplayers
 
     def model_update(self):
         self.fly.fly()
@@ -49,6 +53,7 @@ class ViewGame:
         self.v_hand.redraw(display)
         self.v_s_cards.redraw(display)
         self.v_table.redraw(display)
+        self.v_players.redraw(display)
         self.fly.redraw(display)
         pygame.display.update()
 
@@ -58,5 +63,6 @@ class ViewGame:
         self.v_hand.event_processing(event)
         self.v_s_cards.event_processing(event)
         self.v_table.event_processing(event)
+        self.v_players.event_processing(event)
 
 

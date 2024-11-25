@@ -35,13 +35,13 @@ class Application:
             clock.tick(RSC['FPS'])
 
     def connect_with_game(self, game_server: GameServer):
-        game_server.check_data_for_gui()
+        # game_server.check_data_for_gui()
         self.vgame = ViewGame(game_server)
 
 
 if __name__ == '__main__':
     app = Application()
-    filename = 'cow_2bots.json'
+    filename = 'saved_game.json'
     game_server = GameServer.load_game(filename)
     app.connect_with_game(game_server)
     app.run()

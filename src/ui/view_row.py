@@ -19,7 +19,6 @@ class ViewRow:
             vc.event_processing(event)
 
     def create_view_row(self, row: Row, bound: pygame.Rect):
-        print('\ntable')
         if row is None:
             return []
         bx = bound.x

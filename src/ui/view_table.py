@@ -20,6 +20,7 @@ class ViewTable:
             vr.event_processing(event)
 
     def create_view_table(self, table: Table, bound: pygame.Rect):
+        print('\ntable')
         if table is None:
             return []
         view_table = []
