@@ -79,6 +79,13 @@ class GameServer:
         with open(filename, 'w') as fout:
             json.dump(data, fout, indent=4)
 
+    def save_and_exit(self, filename: str | Path):
+        data = self.save_to_dict()
+        with open(filename, 'w') as fout:
+            json.dump(data, fout, indent=4)
+        print(f"Игра закончена преждевременно. Сохранение прогресса в файл {filename}...")
+        sys.exit()
+
     @classmethod
     def new_game(cls, player_types: dict):
         game_state: GameState = GameState(list(player_types.keys()), Table())
@@ -140,6 +147,9 @@ class GameServer:
         print(f"Ход игрока: {current_player.name}({current_player.score})")  # убрать
 
         card = self.player_types[current_player].choose_card(current_player.hand, self.game_state.table)  # выбор
+        if card is None:  # проверка на перждевремемнный выход
+            self.save_and_exit('saved_game.json')
+
         self.inform_all("inform_card_chosen", current_player)
         if card:
             # print(f"{current_player.name}({current_player.score}): выбирает карту {card}")  # убрать
@@ -265,26 +275,26 @@ class GameServer:
 
         return name, kind
 
-    def check_data_for_gui(self):
-        ptypes = self.player_types
-        if len(ptypes) != 2:
-            raise ValueError(f'Игроков должно быть 2,  а не {len(ptypes)}')
-        for player, player_type in ptypes.items():
-            if player_type != Bot:
-                raise ValueError(f'Все игроки должны быть боты, игрок {player.name} типа {player_type}')
+    # def check_data_for_gui(self):
+    #     ptypes = self.player_types
+    #     if len(ptypes) != 2:
+    #         raise ValueError(f'Игроков должно быть 2,  а не {len(ptypes)}')
+    #     for player, player_type in ptypes.items():
+    #         if player_type != Bot:
+    #             raise ValueError(f'Все игроки должны быть боты, игрок {player.name} типа {player_type}')
 
 
 def __main__():
-    load_from_file = False  # False - загрузить игру
-    filename_to_load = 'cow_2bots.json'
-    filename_to_save = 'cow2bots.json'
+    load_from_file = False  # True - загрузить игру
+    filename_to_load = 'cow4humbots.json'
+    filename_to_save = 'cow_4hum_bots_end.json'
     if load_from_file:
         server = GameServer.load_game(filename_to_load)
         server.run()
         server.save(filename_to_save)
     else:
         server = GameServer.new_game(GameServer.get_players())
-        server.save('cow1.json')
+        server.save(filename_to_save)
         server.run()
 
 
