@@ -10,6 +10,7 @@ from src.player import Player
 from src.hand import Hand
 from src.player_interaction import PlayerInteraction
 import src.player_interactions as all_player_types
+from src.player_interactions import Bot
 
 # END_TURN = "End turn"
 
@@ -263,6 +264,14 @@ class GameServer:
             print(f"Разрешенные типы игроков: H/h для Human, B/b для Bot.")
 
         return name, kind
+
+    def check_data_for_gui(self):
+        ptypes = self.player_types
+        if len(ptypes) != 2:
+            raise ValueError(f'Игроков должно быть 2,  а не {len(ptypes)}')
+        for player, player_type in ptypes.items():
+            if player_type != Bot:
+                raise ValueError(f'Все игроки должны быть боты, игрок {player.name} типа {player_type}')
 
 
 def __main__():

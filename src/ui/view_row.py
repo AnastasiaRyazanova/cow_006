@@ -36,32 +36,4 @@ class ViewRow:
 
         return view_cards
 
-    # def create_view_s_row(self, row: Row, bound: pygame.Rect):
-    #     print('\nrow')
-    #     if row is None:
-    #         return []
-    #     length = len(row.cards)
-    #     print('Row lengh: ', length)
-    #     bx = bound.x
-    #     by = bound.y
-    #
-    #     view_sel_cards = []
-    #     max_cards_in_row = 5
-    #
-    #     for index, card in enumerate(row.cards):
-    #         if index >= max_cards_in_row:
-    #             bx = bound.x
-    #             y_offset = RSC['card_ygap']
-    #         else:
-    #             y_offset = 0
-    #
-    #         vscard = ViewCard(card, x=bx, y=by + y_offset)
-    #         view_sel_cards.append(vscard)
-    #         bx += ViewCard.WIDTH + RSC["card_xgap"]
-    #         if (index + 1) % max_cards_in_row == 0:
-    #             by += ViewCard.HEIGHT + RSC["card_ygap"]
-    #
-    #         print(f'Add view row selected_card {vscard}')
-    #     return view_sel_cards
-
 
