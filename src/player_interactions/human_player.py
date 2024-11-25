@@ -41,3 +41,4 @@ class Human(PlayerInteraction):
             except ValueError:
                 print("Повторите ввод. Введите число, указывающее на номер ряда ")
 
+
