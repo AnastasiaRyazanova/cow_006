@@ -14,15 +14,25 @@ class ViewCard:
     BORDERY = RSC["border_y"]
 
     def __init__(self, card: Card, x: int = 0, y: int = 0, opened: bool = True):
+        self.img_front = None
         self.card = card
         self.x = x
         self.y = y
         self.opened = opened
         self.selected = False
-        img = pygame.image.load(f'img/{card.number}.png')
-        # self.img_front = img
+
+    @property
+    def card(self):
+        return self.__card
+
+    @card.setter
+    def card(self, value):
+        if not isinstance(value, Card):
+            raise TypeError(f'Expected Card, got {type(value)}')
+        self.__card = value
+
+        img = pygame.image.load(f'img/{self.card.number}.png')
         self.img_front = pygame.transform.scale(img, (ViewCard.WIDTH, ViewCard.HEIGHT))
-        # print(img.get_size())
         if self.IMAGE_BACK is None:
             img = pygame.image.load('img/back.png')
             self.IMAGE_BACK = pygame.transform.scale(img, (ViewCard.WIDTH, ViewCard.HEIGHT))
@@ -80,8 +90,11 @@ class Fly:
         self.total_iterations: int = 0  # за сколько итераций пролетим от ст дл фнш
         self.iterations: int = 0  # сколько уже пролетели
         self.animation_mode = False
+        self.on_end = None  # функцию, которую вызовем в конце анимации
+        self.on_end_kwargs = {}  # аргументы этой функции
 
-    def begin(self, vcard: ViewCard, finish: tuple[int, int] | ViewCard, total_iterations: int = RSC['FPS']):
+    def begin(self, vcard: ViewCard, finish: tuple[int, int] | ViewCard,
+              total_iterations: int = RSC['FPS'], on_end=None, **kwargs):
         self.vcard = vcard
         self.start = (vcard.x, vcard.y)
         # self.finish = finish
@@ -94,6 +107,8 @@ class Fly:
         self.total_iterations = total_iterations
         self.iterations = 0
         self.animation_mode = True
+        self.on_end = on_end
+        self.on_end_kwargs = kwargs
 
     def redraw(self, display: pygame.Surface):
         if self.animation_mode and self.vcard:
@@ -121,3 +136,4 @@ class Fly:
         self.animation_mode = False
         self.vcard.x = self.finish[0]
         self.vcard.y = self.finish[1]
+        self.on_end(**self.on_end_kwargs)

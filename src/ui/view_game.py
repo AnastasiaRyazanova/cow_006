@@ -99,25 +99,15 @@ class ViewGame:
         else:
             vhand = None  # ????????? :(
 
-        vc = None
-
         for ivc, vc in enumerate(vhand.vcards if vhand else []):
             if vc and vc.card == card:
                 vhand.vcards[ivc] = None
                 break
 
-        finish_position = (0, 0)
-        for vcard, _ in self.v_s_cards.vscards:
-            if vcard.card == card:
-                finish_position = (vcard.x, vcard.y)
-                break
-
-        self.fly.begin(vcard=vc, finish=finish_position)
-
         if len(self.game.game_state.table.selected_cards) == len(self.game.game_state.players):
             self.move_selected_cards_to_table()
 
-    def move_selected_cards_to_table(self):
+    def move_selected_cards_to_table(self, **kwargs):
         updated_vscards = []
         for vcard, player in self.v_s_cards.vscards:
             if vcard.selected:
@@ -134,12 +124,19 @@ class ViewGame:
                         if vcard.card == card:
                             target_position = (vcard.x, vcard.y)
                             break
-                    self.fly.begin(vcard=vcard, finish=target_position)
+                    self.fly.begin(vcard=vcard, finish=target_position,
+                                   on_end=self.end_card_playing, player_index=player)
                     self.game.game_state.table.add_card(card, player)
             else:
                 updated_vscards.append((vcard, player))
 
         self.v_s_cards.vscards = updated_vscards
+
+    def end_card_playing(self, **kwargs):
+        player_index = kwargs['player']
+        player = self.game.game_state.players[player_index]
+        if player_index == 0:
+            self.vhand = ViewHand(player.hand, self.v_hand.bound)
 
 
 

@@ -12,8 +12,11 @@ class Application:
         self.display = pygame.display.set_mode(self.size)
         self.display.fill(ViewGame.DISPLAY_COLOR, (0, 0, self.width, self.height))
         pygame.display.set_caption("COW_006")
-        icon_img = pygame.image.load('img/icon.png')
-        pygame.display.set_icon(icon_img)
+        try:
+            icon_img = pygame.image.load('img/icon.png')
+            pygame.display.set_icon(icon_img)
+        except FileNotFoundError:
+            pass
         # self.vgame = ViewGame()
         self.vgame = None
 
@@ -41,7 +44,7 @@ class Application:
 
 if __name__ == '__main__':
     app = Application()
-    filename = 'cow_2bots.json'
+    filename = 'cow_2.json'
     game_server = GameServer.load_game(filename)
     app.connect_with_game(game_server)
     app.run()

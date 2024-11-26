@@ -1,5 +1,6 @@
 import pygame
 
+from src.card import Card
 from src.row import Row
 from src.table import Table
 from src.ui.view_card import ViewCard
@@ -33,6 +34,3 @@ class ViewTable:
             print(f'Add view row {row}')
 
         return view_table
-
-
-
