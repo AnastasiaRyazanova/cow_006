@@ -31,7 +31,7 @@ class GameServer:
     def __init__(self, player_types, game_state):
         self.game_state: GameState = game_state
         self.player_types: dict = player_types  # {player: PlayerInteractions}
-        self.turn_number = 0
+        self.turn_number = game_state.turn_number
         self.current_phase = GamePhase.CHOOSE_CARD
 
     @classmethod
@@ -70,6 +70,7 @@ class GameServer:
 
     def save_to_dict(self):
         data = self.game_state.save()
+        data['turn_number'] = self.turn_number
         for player_index, player in enumerate(self.player_types.keys()):
             player_interaction = self.player_types[player]
             data['players'][player_index]['kind'] = self.player_types[player].__name__
@@ -97,6 +98,9 @@ class GameServer:
     def run(self):
         while self.current_phase != GamePhase.GAME_END:
             self.run_one_turn()
+            if self.current_phase == GamePhase.GAME_END:
+                break
+            # self.turn_number = self.game_state.turn_number
 
     def run_one_turn(self):
         phases = {
@@ -108,6 +112,8 @@ class GameServer:
             GamePhase.DECLARE_WINNER: self.declare_winner_phase,
             # пока у игроков не закончатся карты/пока не будет 66 очков
         }
+        if self.current_phase == GamePhase.GAME_END:
+            return
         self.current_phase = phases[self.current_phase]()
 
     def deal_start_game_phase(self) -> GamePhase:
@@ -140,11 +146,12 @@ class GameServer:
         self.turn_number += 1
         if self.turn_number <= self.INITIAL_HAND_SIZE:
             print(f"\n===ХОД {self.turn_number}===\nСостояние стола:")
+            print(f'{self.turn_number}')
             print(self.game_state.table)
             print("\nMaster: Игроки выбирают карту")
             return GamePhase.CHOOSE_CARD
         else:
-            return GamePhase.GAME_END
+            return GamePhase.DECLARE_WINNER
 
     def choose_card_phase(self) -> GamePhase:  # игроки выбирают карты
 
@@ -170,9 +177,6 @@ class GameServer:
             self.game_state.next_player()
             return GamePhase.CHOOSE_CARD
         else:
-            print("\n===КОНЕЦ ИГРЫ===")
-            print("Состояние стола:")
-            print(self.game_state.table)
             return GamePhase.DECLARE_WINNER
 
     def place_card_phase(self) -> GamePhase:
@@ -229,7 +233,11 @@ class GameServer:
             getattr(p, method)(*args, **kwargs)
 
     def declare_winner_phase(self) -> GamePhase:
+        print("\n===КОНЕЦ ИГРЫ===")
         print("Master: Игра закончена! Результаты игры: ")
+        print("Состояние стола:")
+        print(self.game_state.table)
+
         one_winner, winners = self.game_state.find_winner()
         if one_winner:
             print("Победитель: ")
@@ -293,8 +301,8 @@ class GameServer:
 
 def __main__():
     load_from_file = False  # True - загрузить игру
-    filename_to_load = 'cow4humbots.json'
-    filename_to_save = 'cow_4hum_bots_end.json'
+    filename_to_load = 'cow_1.json'
+    filename_to_save = 'cow_2.json'
     if load_from_file:
         server = GameServer.load_game(filename_to_load)
         server.run()
