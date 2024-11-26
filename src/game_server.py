@@ -10,7 +10,7 @@ from src.player import Player
 from src.hand import Hand
 from src.player_interaction import PlayerInteraction
 import src.player_interactions as all_player_types
-from src.player_interactions import Bot
+from src.ui.event import post_event, EVENT_PLAY_CARD
 
 # END_TURN = "End turn"
 
@@ -32,6 +32,7 @@ class GameServer:
         self.game_state: GameState = game_state
         self.player_types: dict = player_types  # {player: PlayerInteractions}
         self.turn_number = 0
+        self.current_phase = GamePhase.CHOOSE_CARD
 
     @classmethod
     def get_players(cls):
@@ -94,16 +95,20 @@ class GameServer:
         return gs
 
     def run(self):
-        current_phase = GamePhase.DISPLAY_TABLE
-        while current_phase != GamePhase.GAME_END:
-            phases = {
-                GamePhase.DISPLAY_TABLE: self.display_table_state,  # отображение состояние стола
-                GamePhase.CHOOSE_CARD: self.choose_card_phase,  # игроки выбирают карты, карты добавляются в selected_cards класса table
-                GamePhase.PLACE_CARD: self.place_card_phase,
-                GamePhase.NEXT_PLAYER: self.next_player_phase,
-                GamePhase.DECLARE_WINNER: self.declare_winner_phase,  # пока у игроков не закончатся карты/пока не будет 66 очков
-            }
-            current_phase = phases[current_phase]()
+        while self.current_phase != GamePhase.GAME_END:
+            self.run_one_turn()
+
+    def run_one_turn(self):
+        phases = {
+            GamePhase.DISPLAY_TABLE: self.display_table_state,  # отображение состояние стола
+            GamePhase.CHOOSE_CARD: self.choose_card_phase,
+            # игроки выбирают карты, карты добавляются в selected_cards класса table
+            GamePhase.PLACE_CARD: self.place_card_phase,
+            GamePhase.NEXT_PLAYER: self.next_player_phase,
+            GamePhase.DECLARE_WINNER: self.declare_winner_phase,
+            # пока у игроков не закончатся карты/пока не будет 66 очков
+        }
+        self.current_phase = phases[self.current_phase]()
 
     def deal_start_game_phase(self) -> GamePhase:
         print("\n===НАЧАЛО ИГРЫ===")
@@ -182,8 +187,9 @@ class GameServer:
             print(f'{player.name}({player.score}): добавление карты {card}')
             try:
                 successful, points = self.game_state.play_card(card, player)
-                self.inform_all("inform_card_played", card)
                 if successful:
+                    self.inform_all("inform_card_played", card)
+                    post_event(EVENT_PLAY_CARD, card=card, player_index=self.game_state.current_player)
                     print(f'{player.name}({player.score}): карта {card} добавлена в ряд стола')
                 else:
                     failed_additions.append((player, card))
@@ -204,6 +210,7 @@ class GameServer:
                                 row_to_take.add_card(card)
                                 player.hand.remove_card(card)
                                 self.inform_all("inform_card_played", card)
+                                post_event(EVENT_PLAY_CARD, card=card, player_index=self.game_state.current_player)
                             else:
                                 print("Некорректный номер ряда.")
                         except ValueError:

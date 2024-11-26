@@ -41,7 +41,7 @@ class Application:
 
 if __name__ == '__main__':
     app = Application()
-    filename = 'saved_game.json'
+    filename = 'cow_2bots.json'
     game_server = GameServer.load_game(filename)
     app.connect_with_game(game_server)
     app.run()

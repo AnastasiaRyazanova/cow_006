@@ -1,4 +1,3 @@
-from src.row import Row
 from src.card import Card
 from src.player import Player
 from src.ui.view_card import ViewCard
@@ -10,7 +9,7 @@ from pygame import font
 
 class ViewSelCards:
     def __init__(self, selected_cards: list[tuple[Card, Player]], bound: pygame.Rect):
-        self.vscards: list[tuple[ViewCard, pygame.Surface]] = self.create_view_cards(selected_cards, bound)
+        self.vscards: list[tuple[ViewCard, pygame.Surface]] = self.create_view_scards(selected_cards, bound)
 
     def redraw(self, display: pygame.Surface):
         for vcard, name_surface in self.vscards:
@@ -21,7 +20,7 @@ class ViewSelCards:
         for vcard, _ in self.vscards:
             vcard.event_processing(event)
 
-    def create_view_cards(self, selected_cards: list[tuple[Card, Player]], bound: pygame.Rect):
+    def create_view_scards(self, selected_cards: list[tuple[Card, Player]], bound: pygame.Rect):
         print('\nselected_cards')
         if not selected_cards:
             return []
