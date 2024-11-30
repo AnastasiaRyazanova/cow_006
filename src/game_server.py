@@ -11,6 +11,8 @@ from src.hand import Hand
 from src.player_interaction import PlayerInteraction
 import src.player_interactions as all_player_types
 from src.ui.event import post_event, EVENT_PLAY_CARD
+from src.ui.view_row_of_sel_cards import ViewSelCards
+
 
 # END_TURN = "End turn"
 
@@ -166,6 +168,7 @@ class GameServer:
         if card:
             # print(f"{current_player.name}({current_player.score}): выбирает карту {card}")  # убрать
             self.game_state.table.add_selected_cards(card, current_player)  # добавляется в selected_cards
+            post_event(EVENT_PLAY_CARD, card=card, player_index=self.game_state.current_player_index)
 
         if len(self.game_state.table.selected_cards) == len(self.player_types):  # пока все игроки не выберут карты
             return GamePhase.PLACE_CARD  # переход к размещению карт на стол

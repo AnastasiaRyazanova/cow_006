@@ -14,6 +14,7 @@ class Table:
 
     def add_selected_cards(self, card: Card, player: Player):
         self.selected_cards.append((card, player))  # создается ряд с выбранными картами
+        print(f'Добавлена карта {card} от игрока {player.name}')
         self.selected_cards.sort(key=lambda x: x[0].number)  # сортирует карты по возрастанию
 
     def add_card(self, card: Card, player: Player | None = None) -> (bool, int):
