@@ -10,6 +10,7 @@ RESOURCE = {
     "row_ygap": 10,
     "border_x": 3,
     "border_y": 4,
+    "delay": 0
 }
 
 

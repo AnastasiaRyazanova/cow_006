@@ -1,17 +1,14 @@
 import pygame
+import random
 
 from src.card import Card
-from src.hand import Hand
-from src.deck import Deck
-from src.row import Row
-from src.table import Table
 from src.ui.view_card import ViewCard, Fly
 from src.ui.view_hand import ViewHand
 from src.ui.view_players import ViewPlayers
 from src.ui.view_row_of_sel_cards import ViewSelCards
 from src.ui.view_row import ViewRow
 from src.ui.view_table import ViewTable
-from src.game_server import GameServer
+from src.game_server import GameServer, GamePhase
 from src.resource import RESOURCE as RSC
 from src.ui.event import post_event, EVENT_PLAY_CARD
 
@@ -30,7 +27,8 @@ class ViewGame:
 
         self.v_hand = ViewHand(game.players[0].hand, rplayer1)
 
-        self.v_s_cards = ViewSelCards(game.table.selected_cards, rscards)
+        selected_cards_with_players = [(card, player) for card, player in game.table.selected_cards]
+        self.v_s_cards = ViewSelCards(selected_cards_with_players, rscards)  # ряд карт выбранных игроками
 
         self.v_table = ViewTable(game.table, rtable)
 
@@ -38,6 +36,12 @@ class ViewGame:
 
         self.bot_thinking: int = 0
         self.begin_bot_thinking()
+
+        self.delay = RSC['delay']  # задержка между ходами
+
+    def show_winners(self):  # вывод победителей
+        one_winner, winners = self.game.game_state.find_winner()
+        return [winner.name for winner in winners]
 
     def calculate_geom_contants(self):
         screen_width, screen_height = pygame.display.get_window_size()
@@ -51,13 +55,13 @@ class ViewGame:
         return rplayer, rscards, rtable, rplayers
 
     def model_update(self):
-        # self.fly.fly()
         if self.fly.animation_mode:
             self.fly.fly()
             return
         elif self.stupid_pause():
             return
         self.game.run_one_turn()
+        pygame.time.delay(self.delay)
 
     def begin_bot_thinking(self):
         self.bot_thinking = RSC['FPS']
@@ -70,75 +74,64 @@ class ViewGame:
 
     def redraw(self, display: pygame.Surface):
         display.fill(self.DISPLAY_COLOR)
-        if self.game.game_state.current_player_index == 0:
-            self.v_players.redraw(display)
-            self.v_hand.redraw(display)
+        self.v_players.redraw(display)
+        self.v_hand.redraw(display)
         self.v_s_cards.redraw(display)
         self.v_table.redraw(display)
         self.fly.redraw(display)
-
+        self.display_winners(display)
         pygame.display.update()
+
+    def display_winners(self, display: pygame.Surface):  # создается табличка с именами победителей
+        winners = self.show_winners()
+        if winners:
+            if self.game.current_phase == GamePhase.GAME_END:
+                font = pygame.font.SysFont("Arial", 36)
+                winners_text = "Победители: " + ", ".join(winners)
+                text_surface = font.render(winners_text, True, 'tomato')
+                display.blit(text_surface, (self.XGAP + 8 * ViewCard.WIDTH, self.YGAP + 3 * ViewCard.HEIGHT))
+
+                text_rect = text_surface.get_rect(center=(self.XGAP + 8 * ViewCard.WIDTH + text_surface.get_width() // 2,
+                                              self.YGAP + 3 * ViewCard.HEIGHT + text_surface.get_height() // 2))
+                rect_width = text_surface.get_width() + 20
+                rect_height = text_surface.get_height() + 20
+                back_rect = pygame.Rect(text_rect.x - 10, text_rect.y - 10, rect_width, rect_height)
+                pygame.draw.rect(display, 'white', back_rect)
+                display.blit(text_surface, text_rect.topleft)
 
     def event_processing(self, event: pygame.event.Event):
         if self.fly.animation_mode:
             return
+
         if event.type == EVENT_PLAY_CARD:
             data = event.user_data
             print(f'EVENT_PLAY_CARD user_data={data}')
             card = data['card']
             player_index = data['player_index']
-            self.on_play_card(card=card, player_index=player_index)
+            self.on_play_card(card=card)
+            selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
+            self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
+            self.v_players = ViewPlayers(self.game.game_state.players, self.v_players.bound)
+            self.v_table = ViewTable(self.game.game_state.table, self.v_table.bound)
         self.v_hand.event_processing(event)
-        self.v_s_cards.event_processing(event)
         self.v_table.event_processing(event)
-        self.v_players.event_processing(event)
 
-    def on_play_card(self, card: Card, player_index: int):
-        if player_index == 0:
-            vhand = self.v_hand
-        else:
-            vhand = None  # ????????? :(
-
+    def on_play_card(self, card: Card):
+        vhand = self.v_hand
         for ivc, vc in enumerate(vhand.vcards if vhand else []):
             if vc and vc.card == card:
                 vhand.vcards[ivc] = None
                 break
-
-        if len(self.game.game_state.table.selected_cards) == len(self.game.game_state.players):
-            self.move_selected_cards_to_table()
-
-    def move_selected_cards_to_table(self, **kwargs):
-        updated_vscards = []
-        for vcard, player in self.v_s_cards.vscards:
-            if vcard.selected:
-                card = vcard.card
-                target_row = None
-                for vr in self.v_table.vtable:
-                    if vr.row.can_add_card(card):
-                        target_row = vr
-                        break
-
-                if target_row:
-                    target_position = (0, 0)
-                    for vcard, _ in self.v_s_cards.vscards:
-                        if vcard.card == card:
-                            target_position = (vcard.x, vcard.y)
-                            break
-                    self.fly.begin(vcard=vcard, finish=target_position,
-                                   on_end=self.end_card_playing, player_index=player)
-                    self.game.game_state.table.add_card(card, player)
-            else:
-                updated_vscards.append((vcard, player))
-
-        self.v_s_cards.vscards = updated_vscards
 
     def end_card_playing(self, **kwargs):
         player_index = kwargs['player']
         player = self.game.game_state.players[player_index]
         if player_index == 0:
             self.vhand = ViewHand(player.hand, self.v_hand.bound)
+            self.redraw(pygame.display.get_surface())
 
-
+            selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
+            self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
 
 
 

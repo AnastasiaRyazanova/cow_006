@@ -4,10 +4,11 @@ from src.player import Player
 
 
 class ViewPlayers:
-    FONT_SIZE = 24
-    FONT = 'arial'
+    FONT_SIZE = 28
+    FONT = 'verdana'
 
     def __init__(self, players: list[Player], bound: pygame.Rect):
+        self.bound = bound
         self.vplayers: list[tuple[Player, pygame.Surface]] = self.create_view_players(players, bound)
 
     def redraw(self, display: pygame.Surface):
@@ -31,7 +32,7 @@ class ViewPlayers:
 
         for player in players:
             player_text = f"{player.name}: {player.score}"
-            text_surface = basic_font.render(player_text, True, (0, 0, 0))
+            text_surface = basic_font.render(player_text, True, 'black')
             player.x = bx
             player.y = by
             view_players.append((player, text_surface))
@@ -39,4 +40,3 @@ class ViewPlayers:
 
             print(f'Add selected player {player.name}')
         return view_players
-

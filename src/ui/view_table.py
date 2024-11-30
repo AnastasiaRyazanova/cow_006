@@ -10,6 +10,7 @@ from src.resource import RESOURCE as RSC
 
 class ViewTable:
     def __init__(self, table: Table, bound: pygame.Rect):
+        self.bound = bound
         self.vtable: list[ViewTable] = self.create_view_table(table, bound)
 
     def redraw(self, display: pygame.Surface):
