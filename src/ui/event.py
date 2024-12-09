@@ -1,7 +1,8 @@
 import pygame
 
-EVENT_PLAY_CARD = pygame.USEREVENT + 1   # +2, +3, ....
-# EVENT_ROW_CHOSEN = pygame.USEREVENT + 2
+EVENT_CHOOSE_CARD = pygame.USEREVENT + 1
+EVENT_PLAY_CARD = pygame.USEREVENT + 2   # +2, +3, ....
+
 
 
 def post_event(event_type: int, **kwargs):

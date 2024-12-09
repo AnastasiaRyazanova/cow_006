@@ -14,10 +14,15 @@ class ViewTable:
         self.vtable: list[ViewTable] = self.create_view_table(table, bound)
 
     def redraw(self, display: pygame.Surface):
+        table_width = 6 * (ViewCard.WIDTH + RSC["card_xgap"]) - RSC["card_xgap"]
+        table_height = 4 * (ViewCard.HEIGHT + RSC["row_ygap"] + 5) - RSC["row_ygap"]
+        table_rect = pygame.Rect(self.bound.x-10, self.bound.y-9, table_width, table_height)
+        pygame.draw.rect(display, 'gray', table_rect)
         for vr in self.vtable:
             vr.redraw(display)
 
     def event_processing(self, event: pygame.event.Event):
+
         for vr in self.vtable:
             vr.event_processing(event)
 

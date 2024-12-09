@@ -12,6 +12,16 @@ class ViewHand:
         self.bound = bound
 
     def redraw(self, display: pygame.Surface):
+        table_width = 10 * (ViewCard.WIDTH + RSC["card_xgap"]) - RSC["card_xgap"]
+        table_height = (ViewCard.HEIGHT + RSC["row_ygap"] + 20) - RSC["row_ygap"]
+        table_rect = pygame.Rect(self.bound.x-10, self.bound.y-10, table_width, table_height)
+        pygame.draw.rect(display, 'gray', table_rect)
+
+        font = pygame.font.SysFont("Arial", 32)
+        text = font.render("Карты в руке", True, 'black')
+        text_rect = text.get_rect(center=(self.bound.x + 10*ViewCard.WIDTH // 8, self.bound.y - 30))
+        display.blit(text, text_rect)
+
         for vc in self.vcards:
             if vc is None:
                 continue
@@ -40,3 +50,5 @@ class ViewHand:
             print(f'Add view card {card}')
             vcards.append(vcard)
         return vcards
+
+
