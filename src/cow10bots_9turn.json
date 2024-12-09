@@ -1,0 +1,73 @@
+{
+    "turn_number": 9,
+    "table": {
+        "row1": "[45<2>] [52<1>] [94<1>]",
+        "row2": "[104<1>]",
+        "row3": "[3<1>] ",
+        "row4": "[13<1>] [23<1>] [47<1>]"
+    },
+    "deck": "",
+    "current_player_index": 0,
+    "players": [
+        {
+            "name": "a",
+            "hand": "[41<1>] [80<3>]",
+            "score": 6,
+            "kind": "Bot"
+        },
+        {
+            "name": "s",
+            "hand": "[99<5>] [33<5>]",
+            "score": 2,
+            "kind": "Bot"
+        },
+        {
+            "name": "d",
+            "hand": "[58<1>] [17<1>]",
+            "score": 0,
+            "kind": "Bot"
+        },
+        {
+            "name": "f",
+            "hand": "[46<1>] [90<3>]",
+            "score": 0,
+            "kind": "Bot"
+        },
+        {
+            "name": "h",
+            "hand": "[56<1>] [86<1>]",
+            "score": 16,
+            "kind": "Bot"
+        },
+        {
+            "name": "j",
+            "hand": "[6<1>] [12<1>]",
+            "score": 0,
+            "kind": "Bot"
+        },
+        {
+            "name": "k",
+            "hand": "[8<1>] [39<1>]",
+            "score": 1,
+            "kind": "Bot"
+        },
+        {
+            "name": "l",
+            "hand": "[74<1>] [97<1>]",
+            "score": 1,
+            "kind": "Bot"
+        },
+        {
+            "name": "r",
+            "hand": "[98<1>] [36<1>]",
+            "score": 9,
+            "kind": "Bot"
+        },
+        {
+            "name": "w",
+            "hand": "[82<1>] [88<5>]",
+            "score":4,
+            "kind": "Bot"
+        }
+    ]
+}
