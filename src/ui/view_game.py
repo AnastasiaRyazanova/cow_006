@@ -10,7 +10,7 @@ from src.ui.view_row import ViewRow
 from src.ui.view_table import ViewTable
 from src.game_server import GameServer, GamePhase
 from src.resource import RESOURCE as RSC
-from src.ui.event import post_event, EVENT_PLAY_CARD
+from src.ui.event import post_event, EVENT_PLAY_CARD, EVENT_CHOOSE_CARD
 
 
 class ViewGame:
@@ -51,7 +51,7 @@ class ViewGame:
         rplayer = pygame.Rect(self.XGAP, self.YGAP, screen_width - 2*self.XGAP, self.YGAP + card_height)
         rscards = pygame.Rect(self.XGAP + card_width*8, self.YGAP + card_height * 2, rplayer.width, card_height)
         rtable = pygame.Rect(self.XGAP, self.YGAP + 1.5*card_height, screen_width - 2*self.XGAP, self.YGAP)
-        rplayers = pygame.Rect(screen_width - 150, self.YGAP, 150, screen_height)
+        rplayers = pygame.Rect(screen_width - 180, self.YGAP+30, 150, screen_height)
         return rplayer, rscards, rtable, rplayers
 
     def model_update(self):
@@ -90,9 +90,9 @@ class ViewGame:
                 winners_text = "Победители: " + ", ".join(winners)
                 text_surface = font.render(winners_text, True, 'tomato')
                 display.blit(text_surface, (self.XGAP + 8 * ViewCard.WIDTH, self.YGAP + 3 * ViewCard.HEIGHT))
-
-                text_rect = text_surface.get_rect(center=(self.XGAP + 8 * ViewCard.WIDTH + text_surface.get_width() // 2,
-                                              self.YGAP + 3 * ViewCard.HEIGHT + text_surface.get_height() // 2))
+                text_rect = text_surface.get_rect(
+                    center=(self.XGAP + 8 * ViewCard.WIDTH + text_surface.get_width() // 2,
+                            self.YGAP + 3 * ViewCard.HEIGHT + text_surface.get_height() // 2))
                 rect_width = text_surface.get_width() + 20
                 rect_height = text_surface.get_height() + 20
                 back_rect = pygame.Rect(text_rect.x - 10, text_rect.y - 10, rect_width, rect_height)
@@ -103,36 +103,63 @@ class ViewGame:
         if self.fly.animation_mode:
             return
 
-        if event.type == EVENT_PLAY_CARD:
+        if event.type == EVENT_CHOOSE_CARD:  # игроки выбирают карты, ряд selected_cards заполняется
+            data = event.user_data
+            print(f'EVENT_CHOOSE_CARD user_data={data}')
+            card = data['card']
+            player_index = data['player_index']
+            selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
+            self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
+            self.on_play_card(card=card)
+
+        if event.type == EVENT_PLAY_CARD:  # карты из ряда selected_cards летят на стол
             data = event.user_data
             print(f'EVENT_PLAY_CARD user_data={data}')
             card = data['card']
             player_index = data['player_index']
-            self.on_play_card(card=card)
+            if len(self.game.game_state.table.selected_cards) == len(self.game.game_state.players):
+                self.fly_card()  # вызывается когда все игроки выбрали карты
             selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
             self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
             self.v_players = ViewPlayers(self.game.game_state.players, self.v_players.bound)
             self.v_table = ViewTable(self.game.game_state.table, self.v_table.bound)
         self.v_hand.event_processing(event)
         self.v_table.event_processing(event)
+        self.v_s_cards.event_processing(event)
 
-    def on_play_card(self, card: Card):
+    def on_play_card(self, card: Card):  # убирает выбранную карту из руки игрока
         vhand = self.v_hand
         for ivc, vc in enumerate(vhand.vcards if vhand else []):
             if vc and vc.card == card:
                 vhand.vcards[ivc] = None
                 break
 
-    def end_card_playing(self, **kwargs):
+    def fly_card(self):  # полет из ряда выбранных карт на стол
+        if not self.game.game_state.table.selected_cards:
+            return
+
+        card, player = self.game.game_state.table.selected_cards[0]
+        _x = self.v_table.bound.x + (len(self.v_table.vtable) * (ViewCard.WIDTH + RSC["card_xgap"]))
+        _y = self.v_table.bound.y
+
+        for vc, p in self.v_s_cards.vscards:
+            if vc and vc.card == card:
+                self.fly.begin(vcard=vc, finish=(_x, _y), on_end=self.stop_fly, player=player)
+                self.game.game_state.table.selected_cards.pop(0)
+                selected_cards_with_players = [(c, p) for c, p in self.game.game_state.table.selected_cards]
+                self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
+                break
+
+    def stop_fly(self, **kwargs):
         player_index = kwargs['player']
         player = self.game.game_state.players[player_index]
         if player_index == 0:
             self.vhand = ViewHand(player.hand, self.v_hand.bound)
-            self.redraw(pygame.display.get_surface())
+        selected_cards_with_players = [(c, p) for c, p in self.game.game_state.table.selected_cards]
+        self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
+        self.redraw(pygame.display.get_surface())
 
-            selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
-            self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
-
-
-
+        # selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
+        # self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
+        # self.v_table = self.game.game_state.table
 
