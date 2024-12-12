@@ -108,21 +108,22 @@ class ViewGame:
             print(f'EVENT_CHOOSE_CARD user_data={data}')
             card = data['card']
             player_index = data['player_index']
-            selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
-            self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
-            self.on_play_card(card=card)
+            self.on_play_card(card=card)  # убирает выбранную карту из руки
 
         if event.type == EVENT_PLAY_CARD:  # карты из ряда selected_cards летят на стол
             data = event.user_data
             print(f'EVENT_PLAY_CARD user_data={data}')
             card = data['card']
             player_index = data['player_index']
-            if len(self.game.game_state.table.selected_cards) == len(self.game.game_state.players):
-                self.fly_card()  # вызывается когда все игроки выбрали карты
             selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
             self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
+
+            if len(self.game.game_state.table.selected_cards) == len(self.game.game_state.players):
+                self.fly_card()  # вызывается когда все игроки выбрали карты
+
             self.v_players = ViewPlayers(self.game.game_state.players, self.v_players.bound)
             self.v_table = ViewTable(self.game.game_state.table, self.v_table.bound)
+
         self.v_hand.event_processing(event)
         self.v_table.event_processing(event)
         self.v_s_cards.event_processing(event)
@@ -138,28 +139,35 @@ class ViewGame:
         if not self.game.game_state.table.selected_cards:
             return
 
+        # получает первую карту из selected_cards
         card, player = self.game.game_state.table.selected_cards[0]
-        _x = self.v_table.bound.x + (len(self.v_table.vtable) * (ViewCard.WIDTH + RSC["card_xgap"]))
-        _y = self.v_table.bound.y
 
-        for vc, p in self.v_s_cards.vscards:
+        for vc, pl in self.v_s_cards.vscards:
             if vc and vc.card == card:
+                _x = self.v_table.bound.x + (len(self.v_table.vtable) * (ViewCard.WIDTH + RSC["card_xgap"]))
+                _y = self.v_table.bound.y
+
                 self.fly.begin(vcard=vc, finish=(_x, _y), on_end=self.stop_fly, player=player)
-                self.game.game_state.table.selected_cards.pop(0)
-                selected_cards_with_players = [(c, p) for c, p in self.game.game_state.table.selected_cards]
-                self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
                 break
 
     def stop_fly(self, **kwargs):
-        player_index = kwargs['player']
-        player = self.game.game_state.players[player_index]
-        if player_index == 0:
-            self.vhand = ViewHand(player.hand, self.v_hand.bound)
-        selected_cards_with_players = [(c, p) for c, p in self.game.game_state.table.selected_cards]
-        self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
+        player = kwargs['player']
+        player_index = self.game.game_state.players.index(player)
+
+        if self.game.game_state.table.selected_cards:  # первая карта удаляется из ряда выбр. карт
+            card, p = self.game.game_state.table.selected_cards.pop(0)
+
+            self.v_s_cards.vscards = [(vc, pl) for vc, pl
+                    in self.v_s_cards.vscards if vc and vc.card != card]  # карта удаляется из вьюкарты
+
+            self.game.game_state.table.add_card(card)
+            self.v_table = ViewTable(self.game.game_state.table, self.v_table.bound)
+
+        if player_index == 0:  # обновление руки
+            self.v_hand = ViewHand(player.hand, self.v_hand.bound)
+
         self.redraw(pygame.display.get_surface())
 
-        # selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
-        # self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
-        # self.v_table = self.game.game_state.table
+        # полет следующей карты
+        self.fly_card()
 
