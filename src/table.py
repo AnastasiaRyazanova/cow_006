@@ -20,29 +20,30 @@ class Table:
     def add_card(self, card: Card, player: Player | None = None) -> (bool, int):
         """Добавляет карту в оптимальный ряд."""
         # для заполнения стола в начале игры в game_server, player = None
-        for row in self.rows:     # если в ряд пустой, то автоматически добавляется карта
+        for irow, row in enumerate(self.rows):     # если в ряд пустой, то автоматически добавляется карта
             if not row.cards:
                 row.add_card(card)
-                return True, 0  # возвращается 0 штрафных очков
+                return True, 0, irow  # возвращается 0 штрафных очков и номер ряда, в который добавили
 
         good_rows = [row for row in self.rows if card.can_play(row.cards[-1])]    # ряды, в которые можно добавить карту
 
         if not good_rows:
-            return False, 0
+            return False, 0, 0
 
         # Если есть подходящие ряды, добавляем в оптимальный
         attached_row = min(good_rows, key=lambda r: abs(card.number - r.cards[-1].number))
+        iattached_row = self.rows.index(attached_row)
 
         points = 0
         if len(attached_row.cards) == Row.MAX_CARDS - 1:
             points = attached_row.score()
-            print(f"\tКарта игрока 6-я в ряду {self.rows.index(attached_row) + 1}")
-            print(f"\tИгрок забрал ряд {self.rows.index(attached_row) + 1} и получил {points} очков")
+            print(f"\tКарта игрока 6-я в ряду { iattached_row + 1}")
+            print(f"\tИгрок забрал ряд {iattached_row + 1} и получил {points} очков")
             if player:
                 player.update_score_from_row(attached_row)
             attached_row.clear()
         attached_row.add_card(card)
-        return True, points
+        return True, points, iattached_row
 
     def save(self) -> str:
         """Сохраняет состояние стола в виде JSON строки"""
