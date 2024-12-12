@@ -108,13 +108,7 @@ class ViewGame:
             print(f'EVENT_CHOOSE_CARD user_data={data}')
             card = data['card']
             player_index = data['player_index']
-            self.on_play_card(card=card)  # убирает выбранную карту из руки
-
-        if event.type == EVENT_PLAY_CARD:  # карты из ряда selected_cards летят на стол
-            data = event.user_data
-            print(f'EVENT_PLAY_CARD user_data={data}')
-            card = data['card']
-            player_index = data['player_index']
+            self.on_choose_card(card=card)  # убирает выбранную карту из руки
             selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
             self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
 
@@ -128,7 +122,8 @@ class ViewGame:
         self.v_table.event_processing(event)
         self.v_s_cards.event_processing(event)
 
-    def on_play_card(self, card: Card):  # убирает выбранную карту из руки игрока
+    def on_choose_card(self, card: Card):  # убирает выбранную карту из руки игрока
+        print(f'on_choose_card {card}')
         vhand = self.v_hand
         for ivc, vc in enumerate(vhand.vcards if vhand else []):
             if vc and vc.card == card:
