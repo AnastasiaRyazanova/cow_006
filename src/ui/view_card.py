@@ -46,6 +46,8 @@ class ViewCard:
         return pygame.Rect(self.x, self.y, self.WIDTH, self.HEIGHT)
 
     def redraw(self, display: pygame.Surface):
+        # if self.card is None:
+        #     return
         if self.selected:
             r = (
                 self.x-self.BORDERX,
@@ -97,6 +99,7 @@ class Fly:
 
     def begin(self, vcard: ViewCard, finish: tuple[int, int] | ViewCard,
               total_iterations: int = RSC['FPS'], on_end=None, **kwargs):
+        print(f'Fly begin to {finish}')
         self.vcard = vcard
         self.start = (vcard.x, vcard.y)
         # self.finish = finish
