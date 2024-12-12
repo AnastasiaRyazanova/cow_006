@@ -40,3 +40,7 @@ class Hand:
     def remove_card(self, card: Card):
         self.cards.remove(card)
 
+    def is_empty(self) -> bool:
+        """Пустая рука (True) или нет (False)."""
+        return not self.cards
+
