@@ -32,8 +32,12 @@ class ViewRow:
             view_cards.append(vcard)
             bx += ViewCard.WIDTH + RSC["card_xgap"]
 
-            print(f'Add view row card {card}')
+            # print(f'Add view row card {card}')
 
         return view_cards
 
+    def last_bound(self):
+        """ Возвращает местоположение первого пустого места."""
+        last_vc = self.vrow[-1]
+        return (last_vc.x + ViewCard.WIDTH, last_vc.y)
 

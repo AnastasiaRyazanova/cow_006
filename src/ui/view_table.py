@@ -11,7 +11,10 @@ from src.resource import RESOURCE as RSC
 class ViewTable:
     def __init__(self, table: Table, bound: pygame.Rect):
         self.bound = bound
-        self.vtable: list[ViewTable] = self.create_view_table(table, bound)
+        self.vtable: list[ViewRow] = self.create_view_table(table, bound)
+
+    def __getitem__(self, item):
+        return self.vtable[item]
 
     def redraw(self, display: pygame.Surface):
         table_width = 6 * (ViewCard.WIDTH + RSC["card_xgap"]) - RSC["card_xgap"]
