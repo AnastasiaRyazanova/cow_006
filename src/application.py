@@ -44,14 +44,17 @@ class Application:
 
 
 if __name__ == '__main__':
+    from random import seed
+    seed(7)
     app = Application()
     json_dir = Path(__file__).parent
-    filename_to_load = json_dir / 'cow5bots_9turn.json'
+    filename_to_load = 'cow2bots.json'
+    # filename_to_load = 'cow5bots_9turn.json'
     # filename_to_load = 'cow4bots_1turn.json'
     #filename_to_load = 'cow10bots_9turn.json'
     #filename_to_load = 'cow10bots_1turn.json'
     #filename_to_load = 'cow_2bots_9turn.json'
-    game_server = GameServer.load_game(filename_to_load)
+    game_server = GameServer.load_game(json_dir / filename_to_load)
     app.connect_with_game(game_server)
     app.run()
 
