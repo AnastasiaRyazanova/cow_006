@@ -112,8 +112,17 @@ class ViewGame:
             selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
             self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
 
-            if len(self.game.game_state.table.selected_cards) == len(self.game.game_state.players):
-                self.fly_card()  # вызывается когда все игроки выбрали карты
+        if event.type == EVENT_PLAY_CARD:  # карты из ряда selected_cards летят на стол
+            data = event.user_data
+            print(f'EVENT_PLAY_CARD user_data={data}')
+            card = data['card']
+            player_index = data['player_index']
+            selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
+            self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
+
+            # if len(self.game.game_state.table.selected_cards) == len(self.game.game_state.players):
+            #     self.fly_card()  # вызывается когда все игроки выбрали карты
+            self.fly_card(card, player_index)  # вызывается когда все игроки выбрали карты
 
             self.v_players = ViewPlayers(self.game.game_state.players, self.v_players.bound)
             self.v_table = ViewTable(self.game.game_state.table, self.v_table.bound)
@@ -130,18 +139,18 @@ class ViewGame:
                 vhand.vcards[ivc] = None
                 break
 
-    def fly_card(self):  # полет из ряда выбранных карт на стол
-        if not self.game.game_state.table.selected_cards:
-            return
+    def fly_card(self, card: Card, player_index: int):  # полет из ряда выбранных карт на стол
+        # if not self.game.game_state.table.selected_cards:
+        #    return
 
         # получает первую карту из selected_cards
-        card, player = self.game.game_state.table.selected_cards[0]
+        # card, player = self.game.game_state.table.selected_cards[0]
 
         for vc, pl in self.v_s_cards.vscards:
             if vc and vc.card == card:
                 _x = self.v_table.bound.x + (len(self.v_table.vtable) * (ViewCard.WIDTH + RSC["card_xgap"]))
                 _y = self.v_table.bound.y
-
+                player = self.game.game_state.players[player_index]
                 self.fly.begin(vcard=vc, finish=(_x, _y), on_end=self.stop_fly, player=player)
                 break
 
@@ -164,5 +173,5 @@ class ViewGame:
         self.redraw(pygame.display.get_surface())
 
         # полет следующей карты
-        self.fly_card()
+        # self.fly_card()
 
