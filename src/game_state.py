@@ -60,18 +60,18 @@ class GameState:
         """Ход переходит к следующему игроку."""
         self.__current_player = (self.__current_player + 1) % len(self.players)
 
-    def play_card(self, card: Card, player: Player) -> (bool, int):
+    def play_card(self, card: Card, player: Player) -> (bool, int, int):
         """Текущий игрок играет карту."""
         if card.number not in Card.NUMBERS:
-            return False, 0
+            return False, 0, 0
 
         if card not in player.hand.cards:
             raise ValueError(f"{player.name} не имеет карты {card} в руке.")
 
         player.hand.remove_card(card)
 
-        successful, points = self.table.add_card(card)
-        return successful, points
+        successful, points, irow = self.table.add_card(card)
+        return successful, points, irow
 
     def is_game_over(self) -> bool:
         """Проверяет, закончилась ли игра."""

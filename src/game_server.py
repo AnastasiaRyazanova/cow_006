@@ -3,6 +3,8 @@ import json
 import sys
 import enum
 from pathlib import Path
+from xmlrpc.client import FastMarshaller
+
 from src.deck import Deck
 from src.game_state import GameState
 from src.table import Table
@@ -10,7 +12,7 @@ from src.player import Player
 from src.hand import Hand
 from src.player_interaction import PlayerInteraction
 import src.player_interactions as all_player_types
-from src.ui.event import post_event, EVENT_PLAY_CARD
+from src.ui.event import post_event, EVENT_PLAY_CARD, EVENT_CHOOSE_CARD
 from src.ui.view_row_of_sel_cards import ViewSelCards
 
 
@@ -20,9 +22,9 @@ from src.ui.view_row_of_sel_cards import ViewSelCards
 class GamePhase(enum.StrEnum):
     START_GAME = "Start game"
     DISPLAY_TABLE = "Display table state"
-    CHOOSE_CARD = "Choose card"
-    PLACE_CARD = "Place card"
-    NEXT_PLAYER = "Switch current player"
+    CHOOSE_CARD = "Choose card"  # DECLARE_WINNER - в начале, если нет карт у игрока (или из фазы NEXT_SELECTED_CARD, если закончились выбранные карты и на руке у игрока нет карт); в конце выбора - NEXT_PLAYER - передаем ход дальше
+    PLACE_CARD = "Place card"    # разыгрывается одна карта из выбранных (наименьшая) PLACE_CARD
+    NEXT_PLAYER = "Switch current player"  # CHOOSE_CARD - есть кому передать ход, PLACE_CARD - все игроки выбрали по карте
     DECLARE_WINNER = "Declare a winner"
     GAME_END = "Game ended"
 
@@ -107,7 +109,7 @@ class GameServer:
     def run_one_turn(self):
         phases = {
             GamePhase.DISPLAY_TABLE: self.display_table_state,  # отображение состояние стола
-            GamePhase.CHOOSE_CARD: self.choose_card_phase,
+            GamePhase.CHOOSE_CARD: self.choose_card_phase,   # NEXT_PLAYER - пока выбираем карты, PLACE_CARD - если все игроки выбрали карты
             # игроки выбирают карты, карты добавляются в selected_cards класса table
             GamePhase.PLACE_CARD: self.place_card_phase,
             GamePhase.NEXT_PLAYER: self.next_player_phase,
@@ -158,6 +160,10 @@ class GameServer:
     def choose_card_phase(self) -> GamePhase:  # игроки выбирают карты
 
         current_player = self.game_state.current_player()
+        # Если у игрока не осталось карт, то пора определять победителя
+        if current_player.hand.is_empty():
+            return GamePhase.DECLARE_WINNER
+
         print(f"Ход игрока: {current_player.name}({current_player.score})")  # убрать
 
         card = self.player_types[current_player].choose_card(current_player.hand, self.game_state.table)  # выбор
@@ -168,68 +174,71 @@ class GameServer:
         if card:
             # print(f"{current_player.name}({current_player.score}): выбирает карту {card}")  # убрать
             self.game_state.table.add_selected_cards(card, current_player)  # добавляется в selected_cards
-            post_event(EVENT_PLAY_CARD, card=card, player_index=self.game_state.current_player_index)
+            # даже не хочу думать, почему эта строка убивает полет в следующей фазе
+            # self.game_state.current_player().hand.remove_card(card)
+            post_event(EVENT_CHOOSE_CARD, card=card, player_index=self.game_state.current_player_index)
+        return GamePhase.NEXT_PLAYER
 
+    def next_player_phase(self) -> GamePhase:
+        """Переход к следующему игроку вынесен отдельной фазой, чтобы можно было потом сделать полет из руки в выбранные карты"""
+        self.game_state.next_player()
         if len(self.game_state.table.selected_cards) == len(self.player_types):  # пока все игроки не выберут карты
             return GamePhase.PLACE_CARD  # переход к размещению карт на стол
         else:
-            return GamePhase.NEXT_PLAYER
-
-    def next_player_phase(self) -> GamePhase:
-        if self.turn_number <= self.INITIAL_HAND_SIZE:
-            self.game_state.next_player()
             return GamePhase.CHOOSE_CARD
-        else:
-            return GamePhase.DECLARE_WINNER
 
     def place_card_phase(self) -> GamePhase:
-        print("\n--- Раскрытие выбранных карт ---")
-        for card, player in self.game_state.table.selected_cards:
-            print(f"{player.name}({player.score}): {card}")
+        # все карты разместили, следующий раунд начинается с выбора карт
+        if not self.game_state.table.selected_cards:
+            return GamePhase.CHOOSE_CARD
+
+        print("\n--- Раскрытие ОДНОЙ выбранной карты ---")
+        card, player = self.game_state.table.selected_cards.pop(0)
+        print(f"{player.name}({player.score}): {card}")
         print("----------------------------------")
         failed_additions = []
 
-        # print(self.game_state.table.selected_cards)
-        for card, player in self.game_state.table.selected_cards:
-            print(f'{player.name}({player.score}): добавление карты {card}')
-            try:
-                successful, points = self.game_state.play_card(card, player)
-                if successful:
-                    self.inform_all("inform_card_played", card)
-                    post_event(EVENT_PLAY_CARD, card=card, player_index=self.game_state.current_player)
-                    print(f'{player.name}({player.score}): карта {card} добавлена в ряд стола')
-                else:
-                    failed_additions.append((player, card))
-                    for player, card in failed_additions:
-                        print(f"{player.name}({player.score}) не смог добавить карту {card} на стол.")
-                        row = self.player_types[player].choose_row(self.game_state.table, card)
-                        self.inform_all("inform_row_chosen", player, row)
-                        try:
-                            selected_row_index = int(row)
-                            if 0 <= selected_row_index < len(self.game_state.table.rows):
-                                row_to_take = self.game_state.table.rows[selected_row_index]
-                                if row_to_take.cards:
-                                    points = row_to_take.score()
-                                    print(f"{player.name}({player.score}): забирает ряд {selected_row_index + 1} и получает {points} очков.")
-                                    print(f"\tКарта {card} становится 1-й в ряду {selected_row_index + 1}")
-                                    player.score += points
-                                    row_to_take.clear()
-                                row_to_take.add_card(card)
-                                player.hand.remove_card(card)
-                                self.inform_all("inform_card_played", card)
-                                post_event(EVENT_PLAY_CARD, card=card, player_index=self.game_state.current_player)
-                            else:
-                                print("Некорректный номер ряда.")
-                        except ValueError:
-                            pass
-                             # print("Пожалуйста, вводите только числа.")
-            except ValueError as e:
+        print(f'{player.name}({player.score}): добавление карты {card}')
+        try:
+            successful, points, irow = self.game_state.play_card(card, player)
+            if successful:
+                self.inform_all("inform_card_played", card)
+                iplayer = self.game_state.current_player_index
+                post_event(EVENT_PLAY_CARD, card=card, player_index=iplayer, irow=irow)
+                print(f'{player.name}({player.score}): карта {card} добавлена в ряд стола')
+            else:
                 failed_additions.append((player, card))
-                print(str(e))
+                for player, card in failed_additions:
+                    print(f"{player.name}({player.score}) не смог добавить карту {card} на стол.")
+                    row = self.player_types[player].choose_row(self.game_state.table, card)
+                    self.inform_all("inform_row_chosen", player, row)
+                    try:
+                        selected_row_index = int(row)
+                        if 0 <= selected_row_index < len(self.game_state.table.rows):
+                            row_to_take = self.game_state.table.rows[selected_row_index]
+                            if row_to_take.cards:
+                                points = row_to_take.score()
+                                print(f"{player.name}({player.score}): забирает ряд {selected_row_index + 1} и получает {points} очков.")
+                                print(f"\tКарта {card} становится 1-й в ряду {selected_row_index + 1}")
+                                player.score += points
+                                row_to_take.clear()
+                            row_to_take.add_card(card)
+                            # хм, если удалять карту из руки на этапе выбора карты, полета на следующей фазе не будет
+                            # player.hand.remove_card(card)
+                            self.inform_all("inform_card_played", card)
+                            post_event(EVENT_PLAY_CARD, card=card, player_index=self.game_state.current_player_index, irow=selected_row_index)
+                        else:
+                            print("Некорректный номер ряда.")
+                    except ValueError:
+                        pass
+                         # print("Пожалуйста, вводите только числа.")
+        except ValueError as e:
+            failed_additions.append((player, card))
+            print(str(e))
 
         self.display_table_state()
-        self.game_state.table.selected_cards.clear()
-        return GamePhase.NEXT_PLAYER
+
+        return GamePhase.PLACE_CARD
 
     def inform_all(self, method: str, *args, **kwargs):
         for p in self.player_types.values():
@@ -300,6 +309,10 @@ class GameServer:
     #     for player, player_type in ptypes.items():
     #         if player_type != Bot:
     #             raise ValueError(f'Все игроки должны быть боты, игрок {player.name} типа {player_type}')
+
+    def selected_cards(self):
+        """Возвращает список выбранных карт, функция-обертка."""
+        return self.game_state.table.selected_cards
 
 
 def __main__():

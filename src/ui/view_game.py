@@ -107,31 +107,30 @@ class ViewGame:
             data = event.user_data
             print(f'EVENT_CHOOSE_CARD user_data={data}')
             card = data['card']
-            player_index = data['player_index']
-            self.on_choose_card(card=card)  # убирает выбранную карту из руки
-            selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
-            self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
+            self.on_choose_card(card=card)  # убирает выбранную карту из вьюхи руки
+            self.v_s_cards = ViewSelCards(self.game.selected_cards(), self.v_s_cards.bound)
 
         if event.type == EVENT_PLAY_CARD:  # карты из ряда selected_cards летят на стол
             data = event.user_data
             print(f'EVENT_PLAY_CARD user_data={data}')
-            card = data['card']
+            selected_card = data['card']
             player_index = data['player_index']
-            selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards]
+            irow = data['irow']
+            selected_cards_with_players = [(card, player) for card, player in self.game.game_state.table.selected_cards if card != selected_card]
             self.v_s_cards = ViewSelCards(selected_cards_with_players, self.v_s_cards.bound)
 
-            # if len(self.game.game_state.table.selected_cards) == len(self.game.game_state.players):
-            #     self.fly_card()  # вызывается когда все игроки выбрали карты
-            self.fly_card(card, player_index)  # вызывается когда все игроки выбрали карты
+            # полетит пока без имени игрока
+            flying_card = ViewCard(selected_card, x = self.v_s_cards.bound.x, y = self.v_s_cards.bound.y)
+            self.fly_card(flying_card, player_index, irow=irow)  # вызывается когда все игроки выбрали карты
 
-            self.v_players = ViewPlayers(self.game.game_state.players, self.v_players.bound)
-            self.v_table = ViewTable(self.game.game_state.table, self.v_table.bound)
+            # перерисуем после того, как карта долетит до ряда
 
         self.v_hand.event_processing(event)
         self.v_table.event_processing(event)
         self.v_s_cards.event_processing(event)
 
-    def on_choose_card(self, card: Card):  # убирает выбранную карту из руки игрока
+    def on_choose_card(self, card: Card):
+        """Убирает выбранную карту из руки игрока, добавляет в выбранные карты"""
         print(f'on_choose_card {card}')
         vhand = self.v_hand
         for ivc, vc in enumerate(vhand.vcards if vhand else []):
@@ -139,39 +138,28 @@ class ViewGame:
                 vhand.vcards[ivc] = None
                 break
 
-    def fly_card(self, card: Card, player_index: int):  # полет из ряда выбранных карт на стол
-        # if not self.game.game_state.table.selected_cards:
-        #    return
-
-        # получает первую карту из selected_cards
-        # card, player = self.game.game_state.table.selected_cards[0]
-
-        for vc, pl in self.v_s_cards.vscards:
-            if vc and vc.card == card:
-                _x = self.v_table.bound.x + (len(self.v_table.vtable) * (ViewCard.WIDTH + RSC["card_xgap"]))
-                _y = self.v_table.bound.y
-                player = self.game.game_state.players[player_index]
-                self.fly.begin(vcard=vc, finish=(_x, _y), on_end=self.stop_fly, player=player)
-                break
+    def fly_card(self, vcard: ViewCard, player_index: int, irow: int):
+        """полет карты vcard в ряд irow
+        TODO: если irow=None, это полет из руки в область выбранных карт
+        """
+        finish = self.v_table[irow].last_bound()
+        self.fly.begin(vcard=vcard, finish=finish, on_end=self.stop_fly, iplayer=player_index)
 
     def stop_fly(self, **kwargs):
-        player = kwargs['player']
-        player_index = self.game.game_state.players.index(player)
-
-        if self.game.game_state.table.selected_cards:  # первая карта удаляется из ряда выбр. карт
-            card, p = self.game.game_state.table.selected_cards.pop(0)
-
-            self.v_s_cards.vscards = [(vc, pl) for vc, pl
-                    in self.v_s_cards.vscards if vc and vc.card != card]  # карта удаляется из вьюкарты
-
-            self.game.game_state.table.add_card(card)
-            self.v_table = ViewTable(self.game.game_state.table, self.v_table.bound)
-
-        if player_index == 0:  # обновление руки
-            self.v_hand = ViewHand(player.hand, self.v_hand.bound)
-
+        """Пересобираем все вьюхи по актуальным значениям и отрисовываем их."""
+        self.rebuild_all_views()
         self.redraw(pygame.display.get_surface())
 
-        # полет следующей карты
-        # self.fly_card()
+    def rebuild_all_views(self):
+        """Пересобирает все вьюхи по актуальным значениям модели."""
+        rplayer1, rscards, rtable, rplayers = self.calculate_geom_contants()
+        game = self.game.game_state
 
+        self.v_hand = ViewHand(game.players[0].hand, rplayer1)
+
+        selected_cards_with_players = [(card, player) for card, player in game.table.selected_cards]
+        self.v_s_cards = ViewSelCards(selected_cards_with_players, rscards)  # ряд карт выбранных игроками
+
+        self.v_table = ViewTable(game.table, rtable)
+
+        self.v_players = ViewPlayers(game.players, rplayers)
