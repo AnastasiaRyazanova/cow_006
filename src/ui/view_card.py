@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pygame
 
 from src.card import Card
@@ -31,10 +33,10 @@ class ViewCard:
             raise TypeError(f'Expected Card, got {type(value)}')
         self.__card = value
 
-        img = pygame.image.load(f'img/{self.card.number}.png')
+        img = pygame.image.load(Path(__file__).parent.parent / f'img/{self.card.number}.png')
         self.img_front = pygame.transform.scale(img, (ViewCard.WIDTH, ViewCard.HEIGHT))
         if self.IMAGE_BACK is None:
-            img = pygame.image.load('img/back.png')
+            img = pygame.image.load(Path(__file__).parent.parent / 'img/back.png')
             self.IMAGE_BACK = pygame.transform.scale(img, (ViewCard.WIDTH, ViewCard.HEIGHT))
 
     def __repr__(self):

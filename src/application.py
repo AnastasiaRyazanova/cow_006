@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pygame
 
 from src.resource import RESOURCE as RSC
@@ -43,7 +45,8 @@ class Application:
 
 if __name__ == '__main__':
     app = Application()
-    filename_to_load = 'cow5bots_9turn.json'
+    json_dir = Path(__file__).parent
+    filename_to_load = json_dir / 'cow5bots_9turn.json'
     # filename_to_load = 'cow4bots_1turn.json'
     #filename_to_load = 'cow10bots_9turn.json'
     #filename_to_load = 'cow10bots_1turn.json'
